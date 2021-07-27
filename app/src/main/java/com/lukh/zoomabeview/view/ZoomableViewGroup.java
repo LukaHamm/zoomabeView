@@ -7,6 +7,8 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.*;
 
+import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
+
 import java.util.jar.Attributes;
 
 public class ZoomableViewGroup extends ViewGroup {
@@ -35,6 +37,8 @@ public class ZoomableViewGroup extends ViewGroup {
     private float[] mDispatchTouchEventWorkingArray = new float[2];
     private float[] mOnTouchEventWorkingArray = new float[2];
 
+
+    private OnCircuitComponentDragListener onCircuitComponentDragListener;
 
     public ZoomableViewGroup(Context context) {
         super(context);
@@ -133,10 +137,16 @@ public class ZoomableViewGroup extends ViewGroup {
     }
 
     @Override
+    public boolean onDragEvent(DragEvent event) {
+        onCircuitComponentDragListener.setmTranslateMatrixInverse(mTranslateMatrixInverse);
+        onCircuitComponentDragListener.setmScaleMatrixInverse(mScaleMatrixInverse);
+        return onCircuitComponentDragListener.onDrag(this,event);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mOnTouchEventWorkingArray[0] = ev.getX();
         mOnTouchEventWorkingArray[1] = ev.getY();
-
         mOnTouchEventWorkingArray = scaledPointsToScreenPoints(mOnTouchEventWorkingArray);
 
         ev.setLocation(mOnTouchEventWorkingArray[0], mOnTouchEventWorkingArray[1]);
@@ -225,4 +235,14 @@ public class ZoomableViewGroup extends ViewGroup {
             return true;
         }
     }
+
+    public OnCircuitComponentDragListener getOnCircuitComponentDragListener() {
+        return onCircuitComponentDragListener;
+    }
+
+    public void setOnCircuitComponentDragListener(OnCircuitComponentDragListener onCircuitComponentDragListener) {
+        this.onCircuitComponentDragListener = onCircuitComponentDragListener;
+    }
 }
+
+

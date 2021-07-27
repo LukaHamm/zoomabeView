@@ -2,6 +2,7 @@ package com.lukh.zoomabeview.Listeners;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
@@ -9,7 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.dynamicanimation.animation.SpringAnimation;
+
 import com.google.android.material.card.MaterialCardView;
+
+import java.util.Arrays;
 
 public class OnCircuitComponentDragListener implements View.OnDragListener {
 
@@ -18,16 +23,26 @@ public class OnCircuitComponentDragListener implements View.OnDragListener {
     private Context context;
     private boolean isSourceCircuitDiagram;
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
+    private Matrix mTranslateMatrix;
+    private Matrix mTranslateMatrixInverse;
+    private Matrix mScaleMatrix = new Matrix();
+    private Matrix mScaleMatrixInverse = new Matrix();
+    private  float [] coords = new float[2];
+    private float [] oldCoords = new float[2];
+    private float [] translation = new float[2];
+    private float scaleFactor;
     private int idcount;
 
 
-    private ImageView tagForDraggedComponent;
+    private float[] screenPointsToScaledPoints(float[] a){
+        mTranslateMatrixInverse.mapPoints(a);
+        mScaleMatrixInverse.mapPoints(a);
+        return a;
+    }
 
-
-    public OnCircuitComponentDragListener (Context context, OnCircuitComponentTouchedListener onCircuitComponentTouchedListener,ImageView tagForDraggedComponent){
+    public OnCircuitComponentDragListener (Context context, OnCircuitComponentTouchedListener onCircuitComponentTouchedListener){
         this.context = context;
         this.onCircuitComponentTouchedListener = onCircuitComponentTouchedListener;
-        this.tagForDraggedComponent= tagForDraggedComponent;
         idcount = 1;
     }
 
@@ -47,6 +62,7 @@ public class OnCircuitComponentDragListener implements View.OnDragListener {
             id = id.substring(0,id.length()-1);
             copiedDraggedComponent.setTag(id+idcount);
             copiedDraggedComponent.setOnTouchListener(onCircuitComponentTouchedListener);
+
             return copiedDraggedComponent;
         }
 
@@ -55,6 +71,8 @@ public class OnCircuitComponentDragListener implements View.OnDragListener {
 
         return  draggedComponent;
     }
+
+
 
 
     @Override
@@ -77,9 +95,18 @@ public class OnCircuitComponentDragListener implements View.OnDragListener {
                     ViewGroup circuitdigramCard = (ViewGroup) v;
                     draggedComponent = prepareDraggedComponent(v,draggedComponent);
                     circuitdigramCard.addView(draggedComponent);
-                    draggedComponent.setX(event.getX());
-                    draggedComponent.setY(event.getY());
+                    if (mTranslateMatrixInverse != null && mScaleMatrixInverse != null){
+                        coords[0]= event.getX();
+                        coords[1] = event.getY();
+                        coords = screenPointsToScaledPoints(coords);
+                        draggedComponent.setX(coords[0]);
+                        draggedComponent.setY(coords[1]);
+                    }else{
+                        draggedComponent.setX(event.getX());
+                        draggedComponent.setY(event.getY());
+                    }
                     draggedComponent.setVisibility(View.VISIBLE);
+
                 }
                 break;
             case DragEvent.ACTION_DRAG_ENDED:
@@ -91,13 +118,20 @@ public class OnCircuitComponentDragListener implements View.OnDragListener {
     }
 
 
-    public ImageView getTagForDraggedComponent() {
-        return tagForDraggedComponent;
+
+    public Matrix getmTranslateMatrixInverse() {
+        return mTranslateMatrixInverse;
     }
 
-    public void setTagForDraggedComponent(ImageView tagForDraggedComponent) {
-        this.tagForDraggedComponent = tagForDraggedComponent;
+    public void setmTranslateMatrixInverse(Matrix mTranslateMatrixInverse) {
+        this.mTranslateMatrixInverse = mTranslateMatrixInverse;
     }
 
+    public Matrix getmScaleMatrixInverse() {
+        return mScaleMatrixInverse;
+    }
 
+    public void setmScaleMatrixInverse(Matrix mScaleMatrixInverse) {
+        this.mScaleMatrixInverse = mScaleMatrixInverse;
+    }
 }

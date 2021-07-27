@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
+import com.lukh.zoomabeview.Listeners.OnCircuitComponentLongClickListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentTouchedListener;
 import com.lukh.zoomabeview.R;
 import com.lukh.zoomabeview.view.ZoomableViewGroup;
@@ -30,6 +31,7 @@ public class CircuitDiagramFragment extends Fragment {
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
     private ScaleGestureDetector scaleGestureDetector;
     private ImageView tagForDraggedComponent;
+    private OnCircuitComponentLongClickListener onCircuitComponentLongClickListener;
 
     public CircuitDiagramFragment(Context context){
         this.context = context;
@@ -52,9 +54,9 @@ public class CircuitDiagramFragment extends Fragment {
         voltageSource.setTag("voltagesource0");
         resistance.setTag("resistance0");
         tagForDraggedComponent = new ImageView(getContext());
-        ciruitDiagramCardView.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener,tagForDraggedComponent));
-        circuitComponentLinearLayout.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener,tagForDraggedComponent));
-        ciruitDiagramCardView.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener,tagForDraggedComponent));
+        //ciruitDiagramCardView.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
+        circuitComponentLinearLayout.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
+        ciruitDiagramCardView.setOnCircuitComponentDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
         //ciruitDiagramCardView.initViewPort();
 
 
