@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
+import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentLongClickListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentTouchedListener;
 import com.lukh.zoomabeview.R;
@@ -44,11 +45,8 @@ public class CircuitDiagramFragment extends Fragment {
         ciruitDiagramCardView = view.findViewById(R.id.circuit_diagram);
         circuitComponentLinearLayout =  view.findViewById(R.id.componentstackContainer);
         onCircuitComponentTouchedListener = new OnCircuitComponentTouchedListener();
+        ciruitDiagramCardView.setOnCircuitComponentDragListenerTest(new OnCircuitComponentDragListenerTest(context,onCircuitComponentTouchedListener));
         initCircuitComponents(view);
-        //ciruitDiagramCardView.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
-        circuitComponentLinearLayout.setOnDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
-        ciruitDiagramCardView.setOnCircuitComponentDragListener(new OnCircuitComponentDragListener(context,onCircuitComponentTouchedListener));
-        //ciruitDiagramCardView.initViewPort();
         return view;
     }
 

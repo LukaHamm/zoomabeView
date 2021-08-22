@@ -48,8 +48,8 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
 
     private CircuitComponent prepareDraggedComponent(View view, CircuitComponent draggedComponent){
         if (!isSourceCircuitDiagram){
-            CircuitComponent copiedDraggedComponent = new CircuitComponent(context);
-            Button rotateBtn = draggedComponent.getRotateButton();
+            CircuitComponent copiedDraggedComponent = new CircuitComponent(context, draggedComponent.getId());
+            Button rotateBtn = copyRotateButton(draggedComponent.getRotateButton());
             ImageView componentSymbol = copyComponent(draggedComponent.getComponentSymbol());
             RelativeLayout relativeLayout = copyRelLayout(draggedComponent.getRelativeLayout());
             copiedDraggedComponent.setBackgroundColor(Color.TRANSPARENT);
@@ -64,6 +64,7 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
             copiedDraggedComponent.setComponentSymbol(componentSymbol);
             copiedDraggedComponent.setRotateButton(rotateBtn);
             copiedDraggedComponent.setRelativeLayout(relativeLayout);
+            copiedDraggedComponent.setOnLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
 
             return copiedDraggedComponent;
         }

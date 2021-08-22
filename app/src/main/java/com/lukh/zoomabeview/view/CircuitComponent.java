@@ -22,7 +22,6 @@ import com.lukh.zoomabeview.R;
 public class CircuitComponent extends LinearLayout {
 
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
-    private OnLongClickListener onLongClickListener;
     private ImageView componentSymbol;
     private Button rotateButton;
     private RelativeLayout relativeLayout;
@@ -36,20 +35,16 @@ public class CircuitComponent extends LinearLayout {
     private int height;
     private int width;
 
-    public CircuitComponent(Context context) {
+    public CircuitComponent(Context context, Integer id) {
         super(context);
-        initializeView(context);
-        initAllChild();
-        initListeners();
+        setId(id);
+
     }
 
     public CircuitComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initializeView(context);
-        //initAllChild();
-        //initListeners();
     }
-
 
 
     public CircuitComponent(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
@@ -65,7 +60,6 @@ public class CircuitComponent extends LinearLayout {
     }
 
 
-
     private void initializeView(Context context) {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -79,50 +73,53 @@ public class CircuitComponent extends LinearLayout {
         initListeners();
     }
 
-    private void initAllChild () {
+
+
+
+    private void initAllChild() {
         int childCount = getChildCount();
         relativeLayout = (RelativeLayout) getChildAt(0);
         //relativeLayout = (RelativeLayout) findViewById(R.id.circuitComponentContainer);
         int childCountRelLayout = relativeLayout.getChildCount();
-        for (int i = 0;i < childCountRelLayout;i++){
+        for (int i = 0; i < childCountRelLayout; i++) {
             View v = relativeLayout.getChildAt(i);
-            if ((v.getResources().getResourceEntryName(v.getId()).equals(componentId))){
+            if ((v.getResources().getResourceEntryName(v.getId()).equals(componentId))) {
                 this.componentSymbol = (ImageView) v;
-            }else{
+            } else {
                 this.rotateButton = (Button) v;
             }
         }
-       //rotateButtonParams = rotateButton.getLayoutParams();
+        //rotateButtonParams = rotateButton.getLayoutParams();
         rotateButton.setEnabled(false);
         rotateButton.setVisibility(INVISIBLE);
         //componentSymbolParams = componentSymbol.getLayoutParams();
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) componentSymbol.getLayoutParams();
-        params.setMargins(0,0,0,0);
+        params.setMargins(0, 0, 0, 0);
         params.setMarginEnd(0);
         initComponent();
     }
 
 
-    private void initComponent (){
+    private void initComponent() {
         String id = this.getResources().getResourceEntryName(this.getId());
         componentSymbol.setImageDrawable(null);
-        if(id.equals(currentSourceId)){
-            componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(),R.drawable.currentsource));
+        if (id.equals(currentSourceId)) {
+            componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.currentsource));
         }
-        if(id.equals(resistanceId)){
-            componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(),R.drawable.resistance));
+        if (id.equals(resistanceId)) {
+            componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.resistance));
         }
-        if(id.equals(voltageSourceId)) {
+        if (id.equals(voltageSourceId)) {
             componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.voltagesource));
 
         }
     }
 
-    private void initListeners(){
-        int parentMeasurements [] = new int[2];
+    private void initListeners() {
+        int parentMeasurements[] = new int[2];
         parentMeasurements[0] = this.width;
         parentMeasurements[1] = this.height;
-        OnCircuitComponentLongClickListener onCircuitComponentLongClickListener = new OnCircuitComponentLongClickListener(rotateButton, componentSymbol,parentMeasurements);
+        OnCircuitComponentLongClickListener onCircuitComponentLongClickListener = new OnCircuitComponentLongClickListener(rotateButton, componentSymbol, parentMeasurements);
         setOnLongClickListener(onCircuitComponentLongClickListener);
         rotateButton.setOnClickListener(new OnRotateButtonClickListener());
     }

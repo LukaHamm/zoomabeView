@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.*;
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
+import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
 
 import java.util.jar.Attributes;
 
@@ -39,6 +40,7 @@ public class ZoomableViewGroup extends ViewGroup {
 
 
     private OnCircuitComponentDragListener onCircuitComponentDragListener;
+    private OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest;
 
     public ZoomableViewGroup(Context context) {
         super(context);
@@ -138,9 +140,9 @@ public class ZoomableViewGroup extends ViewGroup {
 
     @Override
     public boolean onDragEvent(DragEvent event) {
-        onCircuitComponentDragListener.setmTranslateMatrixInverse(mTranslateMatrixInverse);
-        onCircuitComponentDragListener.setmScaleMatrixInverse(mScaleMatrixInverse);
-        return onCircuitComponentDragListener.onDrag(this,event);
+        onCircuitComponentDragListenerTest.setmTranslateMatrixInverse(mTranslateMatrixInverse);
+        onCircuitComponentDragListenerTest.setmScaleMatrixInverse(mScaleMatrixInverse);
+        return onCircuitComponentDragListenerTest.onDrag(this,event);
     }
 
     @Override
@@ -242,6 +244,14 @@ public class ZoomableViewGroup extends ViewGroup {
 
     public void setOnCircuitComponentDragListener(OnCircuitComponentDragListener onCircuitComponentDragListener) {
         this.onCircuitComponentDragListener = onCircuitComponentDragListener;
+    }
+
+    public OnCircuitComponentDragListenerTest getOnCircuitComponentDragListenerTest() {
+        return onCircuitComponentDragListenerTest;
+    }
+
+    public void setOnCircuitComponentDragListenerTest(OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest) {
+        this.onCircuitComponentDragListenerTest = onCircuitComponentDragListenerTest;
     }
 }
 
