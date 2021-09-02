@@ -3,7 +3,10 @@ package com.lukh.zoomabeview.view;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,8 +25,10 @@ import com.lukh.zoomabeview.R;
 public class CircuitComponent extends LinearLayout {
 
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
+    private OnCircuitComponentLongClickListener onCircuitComponentLongClickListener;
     private ImageView componentSymbol;
     private Button rotateButton;
+    private GestureDetector gestureDetector;
     private RelativeLayout relativeLayout;
     private final String rotateButtonId = "rotateButton_";
     private final String componentId = "circuitComponent_";
@@ -73,8 +78,22 @@ public class CircuitComponent extends LinearLayout {
         initListeners();
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(gestureDetector != null){
+            this.gestureDetector.onTouchEvent(event);
+            onCircuitComponentTouchedListener.onTouch(this,event);
+        }
 
+        return super.onTouchEvent(event);
+    }
 
+    private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public void onLongPress(MotionEvent e) {
+            onCircuitComponentLongClickListener.onLongClick(CircuitComponent.this);
+        }
+    }
 
     private void initAllChild() {
         int childCount = getChildCount();
@@ -119,8 +138,6 @@ public class CircuitComponent extends LinearLayout {
         int parentMeasurements[] = new int[2];
         parentMeasurements[0] = this.width;
         parentMeasurements[1] = this.height;
-        OnCircuitComponentLongClickListener onCircuitComponentLongClickListener = new OnCircuitComponentLongClickListener(rotateButton, componentSymbol, parentMeasurements);
-        setOnLongClickListener(onCircuitComponentLongClickListener);
         rotateButton.setOnClickListener(new OnRotateButtonClickListener());
     }
 
@@ -146,5 +163,25 @@ public class CircuitComponent extends LinearLayout {
 
     public void setComponentSymbol(ImageView componentSymbol) {
         this.componentSymbol = componentSymbol;
+    }
+
+    public void generateGestureDetector(){
+        this.gestureDetector = new GestureDetector(getContext(),new GestureListener());
+    }
+
+    public OnCircuitComponentLongClickListener getOnCircuitComponentLongClickListener() {
+        return onCircuitComponentLongClickListener;
+    }
+
+    public void setOnCircuitComponentLongClickListener(OnCircuitComponentLongClickListener onCircuitComponentLongClickListener) {
+        this.onCircuitComponentLongClickListener = onCircuitComponentLongClickListener;
+    }
+
+    public OnCircuitComponentTouchedListener getOnCircuitComponentTouchedListener() {
+        return onCircuitComponentTouchedListener;
+    }
+
+    public void setOnCircuitComponentTouchedListener(OnCircuitComponentTouchedListener onCircuitComponentTouchedListener) {
+        this.onCircuitComponentTouchedListener = onCircuitComponentTouchedListener;
     }
 }

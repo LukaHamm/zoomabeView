@@ -60,12 +60,14 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
             relativeLayout.addView(componentSymbol);
             copiedDraggedComponent.addView(relativeLayout);
             copiedDraggedComponent.setTag(newTag);
-            copiedDraggedComponent.setOnTouchListener(onCircuitComponentTouchedListener);
+            //copiedDraggedComponent.setOnTouchListener(onCircuitComponentTouchedListener);
+            copiedDraggedComponent.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
             copiedDraggedComponent.setComponentSymbol(componentSymbol);
             copiedDraggedComponent.setRotateButton(rotateBtn);
             copiedDraggedComponent.setRelativeLayout(relativeLayout);
-            copiedDraggedComponent.setOnLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
-
+            //copiedDraggedComponent.setOnLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
+            copiedDraggedComponent.setOnCircuitComponentLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
+            copiedDraggedComponent.generateGestureDetector();
             return copiedDraggedComponent;
         }
 
@@ -88,7 +90,7 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
         Button newRotateButton = new Button(context);
         newRotateButton.setBackground(rotateButton.getBackground());
         newRotateButton.setBackgroundColor(Color.BLACK);
-        newRotateButton.setLayoutParams(rotateButton.getLayoutParams());
+        newRotateButton.setLayoutParams(new RelativeLayout.LayoutParams(rotateButton.getLayoutParams()));
         newRotateButton.setEnabled(false);
         newRotateButton.setVisibility(View.INVISIBLE);
         return newRotateButton;
