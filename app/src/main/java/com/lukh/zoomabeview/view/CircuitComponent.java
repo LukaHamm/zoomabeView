@@ -39,10 +39,12 @@ public class CircuitComponent extends LinearLayout {
     private ViewGroup.LayoutParams componentSymbolParams;
     private int height;
     private int width;
+    private boolean isSmallayout;
 
     public CircuitComponent(Context context, Integer id) {
         super(context);
         setId(id);
+
 
     }
 
@@ -71,6 +73,8 @@ public class CircuitComponent extends LinearLayout {
         inflater.inflate(R.layout.sidespinner_view, this);
     }
 
+
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -80,10 +84,9 @@ public class CircuitComponent extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(gestureDetector != null){
-            this.gestureDetector.onTouchEvent(event);
-            onCircuitComponentTouchedListener.onTouch(this,event);
-        }
+
+
+        onCircuitComponentTouchedListener.onTouch(this,event);
 
         return super.onTouchEvent(event);
     }
@@ -95,7 +98,7 @@ public class CircuitComponent extends LinearLayout {
         }
     }
 
-    private void initAllChild() {
+    public void initAllChild() {
         int childCount = getChildCount();
         relativeLayout = (RelativeLayout) getChildAt(0);
         //relativeLayout = (RelativeLayout) findViewById(R.id.circuitComponentContainer);
@@ -111,7 +114,7 @@ public class CircuitComponent extends LinearLayout {
         //rotateButtonParams = rotateButton.getLayoutParams();
         rotateButton.setEnabled(false);
         rotateButton.setVisibility(INVISIBLE);
-        //componentSymbolParams = componentSymbol.getLayoutParams();
+            //componentSymbolParams = componentSymbol.getLayoutParams();
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) componentSymbol.getLayoutParams();
         params.setMargins(0, 0, 0, 0);
         params.setMarginEnd(0);
@@ -134,7 +137,7 @@ public class CircuitComponent extends LinearLayout {
         }
     }
 
-    private void initListeners() {
+    public void initListeners() {
         int parentMeasurements[] = new int[2];
         parentMeasurements[0] = this.width;
         parentMeasurements[1] = this.height;

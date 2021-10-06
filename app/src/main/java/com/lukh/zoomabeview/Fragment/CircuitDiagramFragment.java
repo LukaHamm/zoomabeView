@@ -55,9 +55,9 @@ public class CircuitDiagramFragment extends Fragment {
         resistance = view.findViewById(R.id.resistance);
         voltageSource = view.findViewById(R.id.voltage_source);
         currentSource = view.findViewById(R.id.current_source);
-        resistance.setOnTouchListener(onCircuitComponentTouchedListener);
-        voltageSource.setOnTouchListener(onCircuitComponentTouchedListener);
-        currentSource.setOnTouchListener(onCircuitComponentTouchedListener);
+        resistance.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
+        voltageSource.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
+        currentSource.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
         currentSource.setTag("currentsource0");
         voltageSource.setTag("voltagesource0");
         resistance.setTag("resistance0");

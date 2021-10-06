@@ -49,25 +49,29 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private CircuitComponent prepareDraggedComponent(View view, CircuitComponent draggedComponent){
         if (!isSourceCircuitDiagram){
             CircuitComponent copiedDraggedComponent = new CircuitComponent(context, draggedComponent.getId());
-            Button rotateBtn = copyRotateButton(draggedComponent.getRotateButton());
             ImageView componentSymbol = copyComponent(draggedComponent.getComponentSymbol());
-            RelativeLayout relativeLayout = copyRelLayout(draggedComponent.getRelativeLayout());
+            Button rotateButton = copyRotateButton(draggedComponent.getRotateButton());
+            RelativeLayout relativeLayout = copyRelLayout();
+            relativeLayout.addView(componentSymbol);
+            relativeLayout.addView(rotateButton);
+            copiedDraggedComponent.addView(relativeLayout);
+            copiedDraggedComponent.setRelativeLayout(relativeLayout);
+            copiedDraggedComponent.setComponentSymbol(componentSymbol);
+            copiedDraggedComponent.setRotateButton(rotateButton);
+            //copiedDraggedComponent.initAllChild();
+            copiedDraggedComponent.initListeners();
             copiedDraggedComponent.setBackgroundColor(Color.TRANSPARENT);
             copiedDraggedComponent.setLayoutParams(new ViewGroup.LayoutParams(50, 100));
             String tag = (String) copiedDraggedComponent.getTag();
             String newTag = tag + idcount;
-            relativeLayout.addView(rotateBtn);
-            relativeLayout.addView(componentSymbol);
-            copiedDraggedComponent.addView(relativeLayout);
+
             copiedDraggedComponent.setTag(newTag);
             //copiedDraggedComponent.setOnTouchListener(onCircuitComponentTouchedListener);
             copiedDraggedComponent.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
-            copiedDraggedComponent.setComponentSymbol(componentSymbol);
-            copiedDraggedComponent.setRotateButton(rotateBtn);
-            copiedDraggedComponent.setRelativeLayout(relativeLayout);
+
             //copiedDraggedComponent.setOnLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
-            copiedDraggedComponent.setOnCircuitComponentLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
-            copiedDraggedComponent.generateGestureDetector();
+           // copiedDraggedComponent.setOnCircuitComponentLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
+            //copiedDraggedComponent.generateGestureDetector();
             return copiedDraggedComponent;
         }
 
@@ -82,23 +86,33 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
         ImageView newComponentSymbol = new ImageView(context);
         newComponentSymbol.setImageDrawable(componentSymbol.getDrawable());
         newComponentSymbol.setBackgroundColor(Color.TRANSPARENT);
-        newComponentSymbol.setLayoutParams(componentSymbol.getLayoutParams());
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,90);
+        params.alignWithParent = true;
+        params.bottomMargin = 10;
+        newComponentSymbol.setLayoutParams(params);
         return newComponentSymbol;
     }
 
     private Button copyRotateButton (Button rotateButton){
         Button newRotateButton = new Button(context);
         newRotateButton.setBackground(rotateButton.getBackground());
-        newRotateButton.setBackgroundColor(Color.BLACK);
-        newRotateButton.setLayoutParams(new RelativeLayout.LayoutParams(rotateButton.getLayoutParams()));
-        newRotateButton.setEnabled(false);
-        newRotateButton.setVisibility(View.INVISIBLE);
+        //newRotateButton.setBackgroundColor(Color.BLACK);
+        //newRotateButton.setEnabled(false);
+        //newRotateButton.setVisibility(View.INVISIBLE);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMarginStart(39);
+        params.setMarginEnd(1);
+        params.setMargins(0,0,0,89);
+        params.alignWithParent = true;
+        newRotateButton.setLayoutParams(params);
+
         return newRotateButton;
     }
 
-    private RelativeLayout copyRelLayout(RelativeLayout relativeLayout){
+    private RelativeLayout copyRelLayout(){
         RelativeLayout newRelativeLayout = new RelativeLayout(context);
-        newRelativeLayout.setLayoutParams(relativeLayout.getLayoutParams());
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        newRelativeLayout.setLayoutParams(params);
         return newRelativeLayout;
     }
 

@@ -41,7 +41,6 @@
             android:layout_marginBottom="677dp"
             android:background="@drawable/ic_outline_replay_24"
             android:backgroundTint="@android:color/black"
-            android:textColor="@android:color/black"
-            />
+            android:textColor="@android:color/black" />
     </RelativeLayout>
 </merge>

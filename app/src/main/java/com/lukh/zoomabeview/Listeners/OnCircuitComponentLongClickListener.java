@@ -16,6 +16,8 @@ public class OnCircuitComponentLongClickListener implements View.OnLongClickList
    private int componentMeasurements [] = new int[2];
    private final int [] margins = new int[]{0,31,0,0};
    private final int marginEnd = 56;
+   private final int marginBottom = 10;
+   private final int width = 90;
 
    public OnCircuitComponentLongClickListener(Button rotateButton,ImageView component,int parentMeasurements []){
         this.component = component;
