@@ -2,6 +2,7 @@ package com.lukh.zoomabeview.view;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -39,7 +40,7 @@ public class CircuitComponent extends LinearLayout {
     private ViewGroup.LayoutParams componentSymbolParams;
     private int height;
     private int width;
-    private boolean isSmallayout;
+    private boolean drawMode;
 
     public CircuitComponent(Context context, Integer id) {
         super(context);
@@ -85,8 +86,11 @@ public class CircuitComponent extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-
-        onCircuitComponentTouchedListener.onTouch(this,event);
+        if(!drawMode) {
+            onCircuitComponentTouchedListener.onTouch(this, event);
+        }else{
+            PointF point = new PointF(this.getX(),this.getY());
+        }
 
         return super.onTouchEvent(event);
     }
@@ -186,5 +190,13 @@ public class CircuitComponent extends LinearLayout {
 
     public void setOnCircuitComponentTouchedListener(OnCircuitComponentTouchedListener onCircuitComponentTouchedListener) {
         this.onCircuitComponentTouchedListener = onCircuitComponentTouchedListener;
+    }
+
+    public boolean isDrawMode() {
+        return drawMode;
+    }
+
+    public void setDrawMode(boolean drawMode) {
+        this.drawMode = drawMode;
     }
 }

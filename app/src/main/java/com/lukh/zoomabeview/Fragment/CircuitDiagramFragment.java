@@ -3,6 +3,8 @@ package com.lukh.zoomabeview.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentLongClickListener;
@@ -31,7 +34,10 @@ public class CircuitDiagramFragment extends Fragment {
     private CircuitComponent currentSource;
     private Context context;
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
-    private OnCircuitComponentLongClickListener onCircuitComponentLongClickListener;
+    public  static final String id = "CircuitDiagramFragment";
+    private boolean drawMode;
+
+
 
     public CircuitDiagramFragment(Context context){
         this.context = context;
@@ -41,12 +47,12 @@ public class CircuitDiagramFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.circuit_diagram,container,false);
-
         ciruitDiagramCardView = view.findViewById(R.id.circuit_diagram);
         circuitComponentLinearLayout =  view.findViewById(R.id.componentstackContainer);
         onCircuitComponentTouchedListener = new OnCircuitComponentTouchedListener();
         ciruitDiagramCardView.setOnCircuitComponentDragListenerTest(new OnCircuitComponentDragListenerTest(context,onCircuitComponentTouchedListener));
         initCircuitComponents(view);
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -62,10 +68,26 @@ public class CircuitDiagramFragment extends Fragment {
         voltageSource.setTag("voltagesource0");
         resistance.setTag("resistance0");
 
+
+
     }
 
+    private void initDrawMode(){
+        ciruitDiagramCardView.initDrawMode(drawMode);
 
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.draw:
+                drawMode = !drawMode;
+                initDrawMode();
+                break;
+        }
+
+        return true;
+    }
 
 
 

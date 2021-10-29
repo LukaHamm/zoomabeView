@@ -2,15 +2,14 @@ package com.lukh.zoomabeview.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Rect;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.*;
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
-
-import java.util.jar.Attributes;
 
 public class ZoomableViewGroup extends ViewGroup {
 
@@ -37,7 +36,7 @@ public class ZoomableViewGroup extends ViewGroup {
     private float[] mInvalidateWorkingArray = new float[6];
     private float[] mDispatchTouchEventWorkingArray = new float[2];
     private float[] mOnTouchEventWorkingArray = new float[2];
-
+    private boolean drawMode;
 
     private OnCircuitComponentDragListener onCircuitComponentDragListener;
     private OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest;
@@ -68,6 +67,16 @@ public class ZoomableViewGroup extends ViewGroup {
         }
     }
 
+
+    public void initDrawMode(boolean drawMode){
+        this.drawMode = drawMode;
+        int childCount = getChildCount();
+        for(int i = 0; i< childCount;i++){
+            CircuitComponent circuitComponent = (CircuitComponent) getChildAt(i);
+            circuitComponent.setDrawMode(drawMode);
+        }
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -84,8 +93,14 @@ public class ZoomableViewGroup extends ViewGroup {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         canvas.save();
-        canvas.translate(mPosX, mPosY);
-        canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
+        if(!drawMode) {
+            canvas.translate(mPosX, mPosY);
+            canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
+        }else{
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            canvas.drawLine(mLastTouchX,mLastTouchY,mPosX,mPosY,paint);
+        }
         super.dispatchDraw(canvas);
         canvas.restore();
     }
