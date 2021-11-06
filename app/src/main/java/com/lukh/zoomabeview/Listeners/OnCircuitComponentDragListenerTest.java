@@ -3,6 +3,7 @@ package com.lukh.zoomabeview.Listeners;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
@@ -143,6 +144,9 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
                         coords[0]= event.getX();
                         coords[1] = event.getY();
                         coords = screenPointsToScaledPoints(coords);
+                        if(draggedComponent.getDrawPoint() !=null) {
+                            draggedComponent.setDrawPoint(new PointF(coords[0], coords[1]));
+                        }
                         draggedComponent.setX(coords[0]);
                         draggedComponent.setY(coords[1]);
                     }else{

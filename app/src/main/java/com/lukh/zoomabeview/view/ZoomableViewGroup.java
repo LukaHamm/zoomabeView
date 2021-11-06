@@ -5,11 +5,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.*;
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ZoomableViewGroup extends ViewGroup {
 
@@ -28,6 +33,8 @@ public class ZoomableViewGroup extends ViewGroup {
 
     private float mLastTouchX;
     private float mLastTouchY;
+    private float savedMposX;
+    private float savedMposY;
 
     private float mFocusY;
 
@@ -37,6 +44,10 @@ public class ZoomableViewGroup extends ViewGroup {
     private float[] mDispatchTouchEventWorkingArray = new float[2];
     private float[] mOnTouchEventWorkingArray = new float[2];
     private boolean drawMode;
+    private int touchCount = 0;
+    private PointF drawBegin;
+    private PointF drawEnd;
+    private List<PointF> lineCoordinates = new ArrayList<PointF>();
 
     private OnCircuitComponentDragListener onCircuitComponentDragListener;
     private OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest;
@@ -75,6 +86,7 @@ public class ZoomableViewGroup extends ViewGroup {
             CircuitComponent circuitComponent = (CircuitComponent) getChildAt(i);
             circuitComponent.setDrawMode(drawMode);
         }
+
     }
 
     @Override
@@ -97,12 +109,35 @@ public class ZoomableViewGroup extends ViewGroup {
             canvas.translate(mPosX, mPosY);
             canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
         }else{
+            canvas.translate(mPosX, mPosY);
+            if(drawBegin != null && drawEnd != null) {
+                lineCoordinates.add(new PointF(drawBegin.x, drawBegin.y));
+                lineCoordinates.add(new PointF(drawEnd.x, drawEnd.y));
+            }
+            canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
+            float lineCoordinatesArray [] = pointListToFloatArray(lineCoordinates);
             Paint paint = new Paint();
             paint.setColor(Color.BLACK);
-            canvas.drawLine(mLastTouchX,mLastTouchY,mPosX,mPosY,paint);
-        }
+            canvas.drawLines(lineCoordinatesArray, paint);
+
+            }
+            canvas.save();
         super.dispatchDraw(canvas);
         canvas.restore();
+    }
+    private float [] pointListToFloatArray(List<PointF> points){
+        int size = 2*points.size();
+        int index = 0;
+        float floatArray [] = new float[size];
+        for (PointF point : points){
+            floatArray[index] = point.x;
+            ++index;
+            floatArray[index] = point.y;
+            ++index;
+        }
+
+
+        return floatArray;
     }
 
     @Override
@@ -160,12 +195,11 @@ public class ZoomableViewGroup extends ViewGroup {
         return onCircuitComponentDragListenerTest.onDrag(this,event);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
+
+    private boolean movingComponents(MotionEvent ev){
         mOnTouchEventWorkingArray[0] = ev.getX();
         mOnTouchEventWorkingArray[1] = ev.getY();
         mOnTouchEventWorkingArray = scaledPointsToScreenPoints(mOnTouchEventWorkingArray);
-
         ev.setLocation(mOnTouchEventWorkingArray[0], mOnTouchEventWorkingArray[1]);
         mScaleDetector.onTouchEvent(ev);
 
@@ -230,23 +264,84 @@ public class ZoomableViewGroup extends ViewGroup {
             }
         }
         return true;
+
+    }
+    private boolean drawConnections(MotionEvent ev){
+        /*mOnTouchEventWorkingArray[0] = ev.getX();
+        mOnTouchEventWorkingArray[1] = ev.getY();
+        mOnTouchEventWorkingArray = scaledPointsToScreenPoints(mOnTouchEventWorkingArray);
+        ev.setLocation(mOnTouchEventWorkingArray[0], mOnTouchEventWorkingArray[1]); */
+        if(ev.getAction() == MotionEvent.ACTION_DOWN) {
+            if (touchCount == 0) {
+                drawBegin = new PointF(ev.getX(), ev.getY());
+                drawEnd = null;
+                touchCount++;
+                CircuitComponent component = isPointOnCircuitComponent(drawBegin);
+                if(component!= null){
+                    component.setDrawPoint(drawBegin);
+                }
+                return true;
+            } else if (touchCount == 1) {
+                drawEnd = new PointF(ev.getX(), ev.getY());
+                touchCount = 0;
+                CircuitComponent component = isPointOnCircuitComponent(drawEnd);
+                if(component!= null){
+                    component.setDrawPoint(drawEnd);
+                }
+                invalidate();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public CircuitComponent isPointOnCircuitComponent (PointF point){
+        for(int i = 0;i< getChildCount();i++){
+            CircuitComponent child = (CircuitComponent) getChildAt(i);
+            float rightChild = child.getX() + child.getWidth();
+            float bottomChild = child.getY() + child.getHeight();
+            float [] scaledCoords = {rightChild,bottomChild};
+            float [] scaledCoords2 = {child.getX(),child.getY()};
+            scaledCoords = screenPointsToScaledPoints(scaledCoords);
+            scaledCoords2 = screenPointsToScaledPoints(scaledCoords2);
+            RectF rectF = new RectF(scaledCoords2[0],scaledCoords2[1],scaledCoords[0],scaledCoords[1]);
+            if(rectF.contains(point.x,point.y)){
+                return child;
+            }
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if(drawMode){
+            drawConnections(ev);
+        }else{
+            movingComponents(ev);
+        }
+        return true;
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor *= detector.getScaleFactor();
-            if (detector.isInProgress()) {
-                mFocusX = detector.getFocusX();
-                mFocusY = detector.getFocusY();
+            if(!drawMode) {
+                mScaleFactor *= detector.getScaleFactor();
+                if (detector.isInProgress()) {
+                    mFocusX = detector.getFocusX();
+                    mFocusY = detector.getFocusY();
+                }
+                mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+                mScaleMatrix.setScale(mScaleFactor, mScaleFactor,
+                        mFocusX, mFocusY);
+                mScaleMatrix.invert(mScaleMatrixInverse);
+                invalidate();
+                requestLayout();
             }
-            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
-            mScaleMatrix.setScale(mScaleFactor, mScaleFactor,
-                    mFocusX, mFocusY);
-            mScaleMatrix.invert(mScaleMatrixInverse);
-            invalidate();
-            requestLayout();
 
 
             return true;

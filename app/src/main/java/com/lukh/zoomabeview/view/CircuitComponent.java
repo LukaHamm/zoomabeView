@@ -41,6 +41,8 @@ public class CircuitComponent extends LinearLayout {
     private int height;
     private int width;
     private boolean drawMode;
+    private PointF drawPoint;
+    private String connection;
 
     public CircuitComponent(Context context, Integer id) {
         super(context);
@@ -198,5 +200,21 @@ public class CircuitComponent extends LinearLayout {
 
     public void setDrawMode(boolean drawMode) {
         this.drawMode = drawMode;
+    }
+
+    public PointF getDrawPoint() {
+        return drawPoint;
+    }
+
+    public void setDrawPoint(PointF drawPoint) {
+        this.drawPoint = drawPoint;
+    }
+
+    public String getConnection() {
+        return connection;
+    }
+
+    public void setConnection(String connection) {
+        this.connection = connection;
     }
 }
