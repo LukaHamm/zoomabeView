@@ -3,15 +3,11 @@ package com.lukh.zoomabeview.Listeners;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.PointF;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.lukh.zoomabeview.view.CircuitComponent;
@@ -144,8 +140,20 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
                         coords[0]= event.getX();
                         coords[1] = event.getY();
                         coords = screenPointsToScaledPoints(coords);
-                        if(draggedComponent.getDrawPoint() !=null) {
-                            draggedComponent.setDrawPoint(new PointF(coords[0], coords[1]));
+                        if(draggedComponent.getTopPoint() !=null) {
+                            float [] drawPointCoords = {event.getX(),event.getY()};
+                            drawPointCoords = screenPointsToScaledPoints(drawPointCoords);
+                            drawPointCoords[0] += 25;
+                            draggedComponent.getTopPoint().x = drawPointCoords[0];
+                            draggedComponent.getTopPoint().y = drawPointCoords[1];
+                        }
+                        if(draggedComponent.getBottomPoint() != null){
+                            float [] drawPointCoords = {event.getX(),event.getY()};
+                            drawPointCoords = screenPointsToScaledPoints(drawPointCoords);
+                            drawPointCoords[0] += 25;
+                            drawPointCoords[1] +=90;
+                            draggedComponent.getBottomPoint().x = drawPointCoords[0];
+                            draggedComponent.getBottomPoint().y = drawPointCoords[1];
                         }
                         draggedComponent.setX(coords[0]);
                         draggedComponent.setY(coords[1]);
@@ -164,6 +172,9 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
         }
         return true;
     }
+
+
+
 
 
 

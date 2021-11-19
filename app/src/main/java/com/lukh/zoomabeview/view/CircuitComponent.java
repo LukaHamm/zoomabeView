@@ -1,10 +1,8 @@
 package com.lukh.zoomabeview.view;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -41,7 +39,8 @@ public class CircuitComponent extends LinearLayout {
     private int height;
     private int width;
     private boolean drawMode;
-    private PointF drawPoint;
+    private PointF topPoint;
+    private PointF bottomPoint;
     private String connection;
 
     public CircuitComponent(Context context, Integer id) {
@@ -202,12 +201,21 @@ public class CircuitComponent extends LinearLayout {
         this.drawMode = drawMode;
     }
 
-    public PointF getDrawPoint() {
-        return drawPoint;
+    public PointF getTopPoint() {
+        return topPoint;
     }
 
-    public void setDrawPoint(PointF drawPoint) {
-        this.drawPoint = drawPoint;
+    public void setTopPoint(PointF topPoint) {
+
+        this.topPoint = topPoint;
+    }
+
+    public PointF getBottomPoint() {
+        return bottomPoint;
+    }
+
+    public void setBottomPoint(PointF bottomPoint) {
+        this.bottomPoint = bottomPoint;
     }
 
     public String getConnection() {
@@ -217,4 +225,7 @@ public class CircuitComponent extends LinearLayout {
     public void setConnection(String connection) {
         this.connection = connection;
     }
+
 }
+
+

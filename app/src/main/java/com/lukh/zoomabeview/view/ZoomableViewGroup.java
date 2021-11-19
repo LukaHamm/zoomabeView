@@ -48,6 +48,9 @@ public class ZoomableViewGroup extends ViewGroup {
     private PointF drawBegin;
     private PointF drawEnd;
     private List<PointF> lineCoordinates = new ArrayList<PointF>();
+    private CircuitComponent currentDrawPointBeginComponent;
+    private CircuitComponent currentDrawpointEndComponent;
+    private boolean isBottomValue = false;
 
     private OnCircuitComponentDragListener onCircuitComponentDragListener;
     private OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest;
@@ -108,11 +111,35 @@ public class ZoomableViewGroup extends ViewGroup {
         if(!drawMode) {
             canvas.translate(mPosX, mPosY);
             canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
+            float lineCoordinatesArray [] = pointListToFloatArray(lineCoordinates);
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            canvas.drawLines(lineCoordinatesArray, paint);
         }else{
             canvas.translate(mPosX, mPosY);
             if(drawBegin != null && drawEnd != null) {
-                lineCoordinates.add(new PointF(drawBegin.x, drawBegin.y));
-                lineCoordinates.add(new PointF(drawEnd.x, drawEnd.y));
+                PointF newdrawBegin = new PointF(drawBegin.x,drawBegin.y);
+                PointF newDrawEnd = new PointF(drawEnd.x,drawEnd.y);
+
+                if(currentDrawPointBeginComponent != null){
+                    if(!isBottomValue){
+                        currentDrawPointBeginComponent.setTopPoint(newdrawBegin);
+                    }else{
+                        currentDrawPointBeginComponent.setBottomPoint(newdrawBegin);
+                    }
+                }
+                if(currentDrawpointEndComponent != null){
+                    if(!isBottomValue) {
+                        currentDrawpointEndComponent.setTopPoint(newDrawEnd);
+                    }else{
+                        currentDrawpointEndComponent.setBottomPoint(newDrawEnd);
+                    }
+                }
+                lineCoordinates.add(newdrawBegin);
+                lineCoordinates.add(newDrawEnd);
+                currentDrawPointBeginComponent= null;
+                currentDrawpointEndComponent = null;
+                isBottomValue = false;
             }
             canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
             float lineCoordinatesArray [] = pointListToFloatArray(lineCoordinates);
@@ -125,6 +152,8 @@ public class ZoomableViewGroup extends ViewGroup {
         super.dispatchDraw(canvas);
         canvas.restore();
     }
+
+
     private float [] pointListToFloatArray(List<PointF> points){
         int size = 2*points.size();
         int index = 0;
@@ -273,12 +302,13 @@ public class ZoomableViewGroup extends ViewGroup {
         ev.setLocation(mOnTouchEventWorkingArray[0], mOnTouchEventWorkingArray[1]); */
         if(ev.getAction() == MotionEvent.ACTION_DOWN) {
             if (touchCount == 0) {
-                drawBegin = new PointF(ev.getX(), ev.getY());
+                drawBegin = new PointF(ev.getX() , ev.getY());
                 drawEnd = null;
                 touchCount++;
                 CircuitComponent component = isPointOnCircuitComponent(drawBegin);
                 if(component!= null){
-                    component.setDrawPoint(drawBegin);
+                    currentDrawPointBeginComponent = component;
+                    setPointLocationOnComponent(drawBegin,component);
                 }
                 return true;
             } else if (touchCount == 1) {
@@ -286,8 +316,10 @@ public class ZoomableViewGroup extends ViewGroup {
                 touchCount = 0;
                 CircuitComponent component = isPointOnCircuitComponent(drawEnd);
                 if(component!= null){
-                    component.setDrawPoint(drawEnd);
+                    currentDrawpointEndComponent = component;
+                    setPointLocationOnComponent(drawEnd,component);
                 }
+
                 invalidate();
                 return true;
             }
@@ -296,16 +328,32 @@ public class ZoomableViewGroup extends ViewGroup {
         return false;
     }
 
+    public void setPointLocationOnComponent(PointF drawPoint, CircuitComponent component){
+        float distanceTop = drawPoint.y - component.getY();
+        float distanceBottom = (component.getY() + 100) - drawPoint.y;
+        if(distanceTop < distanceBottom){
+            drawPoint.y = component.getY();
+            drawPoint.x = component.getX() +25;
+        }else{
+            drawPoint.y = component.getY() +90;
+            drawPoint.x = component.getX() +25;
+            isBottomValue = true;
+        }
+
+    }
+
     public CircuitComponent isPointOnCircuitComponent (PointF point){
         for(int i = 0;i< getChildCount();i++){
             CircuitComponent child = (CircuitComponent) getChildAt(i);
             float rightChild = child.getX() + child.getWidth();
             float bottomChild = child.getY() + child.getHeight();
-            float [] scaledCoords = {rightChild,bottomChild};
-            float [] scaledCoords2 = {child.getX(),child.getY()};
+            float x = child.getX();
+            float y = child.getY();
+            /*float [] scaledCoords = {rightChild,bottomChild};
+            float [] scaledCoords2 = {x,y};
             scaledCoords = screenPointsToScaledPoints(scaledCoords);
-            scaledCoords2 = screenPointsToScaledPoints(scaledCoords2);
-            RectF rectF = new RectF(scaledCoords2[0],scaledCoords2[1],scaledCoords[0],scaledCoords[1]);
+            scaledCoords2 = screenPointsToScaledPoints(scaledCoords2);*/
+            RectF rectF = new RectF(x,y,rightChild,bottomChild);
             if(rectF.contains(point.x,point.y)){
                 return child;
             }
