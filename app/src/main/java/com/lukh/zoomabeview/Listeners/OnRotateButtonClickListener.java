@@ -1,6 +1,7 @@
 package com.lukh.zoomabeview.Listeners;
 
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,10 +13,11 @@ import com.lukh.zoomabeview.view.ZoomableViewGroup;
 
 public class OnRotateButtonClickListener implements View.OnClickListener {
 
-    private float previousRotation = 0.0f;
+    private int previousRotation = 0;
 
     private Matrix matrix;
     private ZoomableViewGroup circuitDiagram;
+    private PointF rotationCenter;
 
     public OnRotateButtonClickListener (){
         matrix = new Matrix();
@@ -33,17 +35,20 @@ public class OnRotateButtonClickListener implements View.OnClickListener {
         }else{
             previousRotation = 0;
         }
-        container.setRotation(previousRotation);
         if(container.getTopPoint() != null) {
-            PointF rotatedPoint = rotatePoint90Degrees(container.getTopPoint(),container);
+            //PointF rotatedPoint = rotatePoint90Degrees(container.getTopPoint(),container);
+            PointF rotatedPoint = rotate90Degrees(container.getTopPoint(),50,container);
             container.getTopPoint().x = rotatedPoint.x;
             container.getTopPoint().y = rotatedPoint.y;
         }
         if(container.getBottomPoint() != null) {
-            PointF rotatedPoint = rotatePoint90Degrees(container.getBottomPoint(),container);
+            //PointF rotatedPoint = rotatePoint90Degrees(container.getBottomPoint(),container);
+            PointF rotatedPoint = rotate90Degrees(container.getTopPoint(),-40,container);
             container.getBottomPoint().x = rotatedPoint.x;
             container.getBottomPoint().y = rotatedPoint.y;
         }
+        container.setRotation(previousRotation);
+        circuitDiagram.invalidate();
     }
 
     private PointF rotatePoint90Degrees(PointF pointToRotate, CircuitComponent component){
@@ -63,12 +68,49 @@ public class OnRotateButtonClickListener implements View.OnClickListener {
         PointF rotatedPoint = new PointF(rotatedPointCoords[0],rotatedPointCoords[1]);
         matrix.setRotate(previousRotation);
         circuitDiagram.invalidate();*/
-        PointF rotationCenter = new PointF(component.getX() +25,component.getY() +50);
-        float rotatedX = rotationCenter.x + (pointToRotate.x-rotationCenter.x)* (float) Math.sin(-90) - (pointToRotate.y -rotationCenter.y) * (float) Math.cos(-90);
-        float rotatedy = rotationCenter.y + (pointToRotate.x-rotationCenter.x)* (float) Math.cos(-90) + (pointToRotate.y -rotationCenter.y) * (float) Math.sin(-90);
-        PointF rotatedPoint = new PointF(rotatedX,rotatedy);
-        circuitDiagram.invalidate();
 
+        float componentX = component.getX();
+        float componentY = component.getY();
+        float imageX = component.getComponentSymbol().getX() + componentX;
+        float imageY = component.getComponentSymbol().getY() +componentY;
+        float imageBottom = imageY + component.getComponentSymbol().getHeight();
+        float imageRight = imageX + component.getComponentSymbol().getWidth();
+        float rotationCenterX = component.getComponentSymbol().getWidth()/2;
+        float rotationCenterY = component.getComponentSymbol().getHeight()/2;
+
+
+        if(previousRotation == 90) {
+            rotationCenter = new PointF(component.getX() + 25, component.getY() + 45);
+        }
+        float rotatedX = rotationCenter.x  - (rotationCenter.y-pointToRotate.y) * (float) Math.sin(-90);
+        float rotatedy = rotationCenter.y - (pointToRotate.x-rotationCenter.x)* (float) Math.sin(-90);
+        PointF rotatedPoint = new PointF(rotatedX,rotatedy);
+
+
+
+        return rotatedPoint;
+    }
+
+
+    private PointF rotate90Degrees(PointF pointToRotate, float offsetToMid, CircuitComponent component ){
+        PointF rotateCenter = new PointF(component.getX() +25, component.getY() +50);
+        PointF rotatedPoint = null;
+        switch (previousRotation){
+            case 0:
+                rotatedPoint = new PointF(rotateCenter.x,rotateCenter.y-offsetToMid);
+                break;
+            case 90:
+                rotatedPoint = new PointF(rotateCenter.x+offsetToMid,rotateCenter.y);
+                break;
+            case 180:
+                rotatedPoint = new PointF(rotateCenter.x,rotateCenter.y+offsetToMid);
+                break;
+            case 270:
+                rotatedPoint = new PointF(rotateCenter.x-offsetToMid,rotateCenter.y);
+                break;
+            default:
+                break;
+        }
         return rotatedPoint;
     }
 }

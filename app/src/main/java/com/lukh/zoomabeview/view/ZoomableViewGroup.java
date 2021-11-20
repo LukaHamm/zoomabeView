@@ -330,7 +330,7 @@ public class ZoomableViewGroup extends ViewGroup {
 
     public void setPointLocationOnComponent(PointF drawPoint, CircuitComponent component){
         float distanceTop = drawPoint.y - component.getY();
-        float distanceBottom = (component.getY() + 100) - drawPoint.y;
+        float distanceBottom = (component.getY() + 90) - drawPoint.y;
         if(distanceTop < distanceBottom){
             drawPoint.y = component.getY();
             drawPoint.x = component.getX() +25;
