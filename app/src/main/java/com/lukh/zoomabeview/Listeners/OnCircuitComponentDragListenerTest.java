@@ -3,6 +3,7 @@ package com.lukh.zoomabeview.Listeners;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.view.DragEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +12,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.lukh.zoomabeview.view.CircuitComponent;
+import com.lukh.zoomabeview.view.ConnectionPoint;
 
 public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
 
     private final String componentStackContainer = "componentstackContainer";
     private final String circuitdiagram = "circuit_diagram";
+    private final String circuitComponentTag = "CircuitComponent";
+    private final String connectionPointTag = "ConnectionPoint";
     private Context context;
     private boolean isSourceCircuitDiagram;
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
@@ -23,30 +27,26 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private Matrix mTranslateMatrixInverse;
     private Matrix mScaleMatrix = new Matrix();
     private Matrix mScaleMatrixInverse = new Matrix();
-    private  float [] coords = new float[2];
-    private float [] oldCoords = new float[2];
-    private float [] translation = new float[2];
-    private float scaleFactor;
-    private int idcount;
+    private float[] coords = new float[2];
 
 
-    private float[] screenPointsToScaledPoints(float[] a){
+
+    private float[] screenPointsToScaledPoints(float[] a) {
         mTranslateMatrixInverse.mapPoints(a);
         mScaleMatrixInverse.mapPoints(a);
         return a;
     }
 
-    public OnCircuitComponentDragListenerTest(Context context, OnCircuitComponentTouchedListener onCircuitComponentTouchedListener){
+    public OnCircuitComponentDragListenerTest(Context context, OnCircuitComponentTouchedListener onCircuitComponentTouchedListener) {
         this.context = context;
         this.onCircuitComponentTouchedListener = onCircuitComponentTouchedListener;
-        idcount = 1;
     }
 
 
-    private CircuitComponent prepareDraggedComponent(View view, CircuitComponent draggedComponent){
-        if (!isSourceCircuitDiagram){
+    private CircuitComponent prepareDraggedComponent(View view, CircuitComponent draggedComponent) {
+        if (!isSourceCircuitDiagram) {
             CircuitComponent copiedDraggedComponent = new CircuitComponent(context, draggedComponent.getId());
-            ImageView componentSymbol = copyComponent(draggedComponent.getComponentSymbol());
+            ImageView componentSymbol = copyComponentSymbol(draggedComponent.getComponentSymbol());
             Button rotateButton = copyRotateButton(draggedComponent.getRotateButton());
             RelativeLayout relativeLayout = copyRelLayout();
             relativeLayout.addView(componentSymbol);
@@ -55,65 +55,51 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
             copiedDraggedComponent.setRelativeLayout(relativeLayout);
             copiedDraggedComponent.setComponentSymbol(componentSymbol);
             copiedDraggedComponent.setRotateButton(rotateButton);
-            //copiedDraggedComponent.initAllChild();
             copiedDraggedComponent.initListeners();
             copiedDraggedComponent.setBackgroundColor(Color.TRANSPARENT);
             copiedDraggedComponent.setLayoutParams(new ViewGroup.LayoutParams(50, 100));
-            String tag = (String) copiedDraggedComponent.getTag();
-            String newTag = tag + idcount;
-
-            copiedDraggedComponent.setTag(newTag);
-            //copiedDraggedComponent.setOnTouchListener(onCircuitComponentTouchedListener);
+            copiedDraggedComponent.setTag(circuitComponentTag);
             copiedDraggedComponent.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
-
-            //copiedDraggedComponent.setOnLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
-           // copiedDraggedComponent.setOnCircuitComponentLongClickListener(new OnCircuitComponentLongClickListener(rotateBtn,componentSymbol,new int[]{50,100}));
-            //copiedDraggedComponent.generateGestureDetector();
             return copiedDraggedComponent;
         }
 
         ViewGroup parent = (ViewGroup) draggedComponent.getParent();
         parent.removeView(draggedComponent);
 
-        return  draggedComponent;
+        return draggedComponent;
     }
 
 
-    private ImageView copyComponent(ImageView componentSymbol){
+    private ImageView copyComponentSymbol(ImageView componentSymbol) {
         ImageView newComponentSymbol = new ImageView(context);
         newComponentSymbol.setImageDrawable(componentSymbol.getDrawable());
         newComponentSymbol.setBackgroundColor(Color.TRANSPARENT);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,90);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 90);
         params.alignWithParent = true;
         params.bottomMargin = 10;
         newComponentSymbol.setLayoutParams(params);
         return newComponentSymbol;
     }
 
-    private Button copyRotateButton (Button rotateButton){
+    private Button copyRotateButton(Button rotateButton) {
         Button newRotateButton = new Button(context);
         newRotateButton.setBackground(rotateButton.getBackground());
-        //newRotateButton.setBackgroundColor(Color.BLACK);
-        //newRotateButton.setEnabled(false);
-        //newRotateButton.setVisibility(View.INVISIBLE);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMarginStart(39);
         params.setMarginEnd(1);
-        params.setMargins(0,0,0,89);
+        params.setMargins(0, 0, 0, 89);
         params.alignWithParent = true;
         newRotateButton.setLayoutParams(params);
 
         return newRotateButton;
     }
 
-    private RelativeLayout copyRelLayout(){
+    private RelativeLayout copyRelLayout() {
         RelativeLayout newRelativeLayout = new RelativeLayout(context);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         newRelativeLayout.setLayoutParams(params);
         return newRelativeLayout;
     }
-
-
 
 
     @Override
@@ -131,38 +117,19 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
                 break;
             case DragEvent.ACTION_DROP:
                 // Dropped, reassign View to ViewGroup
-                CircuitComponent draggedComponent  = (CircuitComponent) event.getLocalState();
-                if(v.getResources().getResourceEntryName(v.getId()).equals(circuitdiagram)) {
+                if (v.getResources().getResourceEntryName(v.getId()).equals(circuitdiagram)) {
                     ViewGroup circuitdigramCard = (ViewGroup) v;
-                    draggedComponent = prepareDraggedComponent(v,draggedComponent);
-                    circuitdigramCard.addView(draggedComponent);
-                    if (mTranslateMatrixInverse != null && mScaleMatrixInverse != null){
-                        coords[0]= event.getX();
-                        coords[1] = event.getY();
-                        coords = screenPointsToScaledPoints(coords);
-                        if(draggedComponent.getTopPoint() !=null) {
-                            float [] drawPointCoords = {event.getX(),event.getY()};
-                            drawPointCoords = screenPointsToScaledPoints(drawPointCoords);
-                            drawPointCoords[0] += 25;
-                            draggedComponent.getTopPoint().x = drawPointCoords[0];
-                            draggedComponent.getTopPoint().y = drawPointCoords[1];
-                        }
-                        if(draggedComponent.getBottomPoint() != null){
-                            float [] drawPointCoords = {event.getX(),event.getY()};
-                            drawPointCoords = screenPointsToScaledPoints(drawPointCoords);
-                            drawPointCoords[0] += 25;
-                            drawPointCoords[1] +=90;
-                            draggedComponent.getBottomPoint().x = drawPointCoords[0];
-                            draggedComponent.getBottomPoint().y = drawPointCoords[1];
-                        }
-                        draggedComponent.setX(coords[0]);
-                        draggedComponent.setY(coords[1]);
-                    }else{
-                        draggedComponent.setX(event.getX());
-                        draggedComponent.setY(event.getY());
+                    View view = (View) event.getLocalState();
+                    String tag = (String) view.getTag();
+                    if (tag.equals(circuitComponentTag)) {
+                        CircuitComponent draggedComponent = (CircuitComponent) event.getLocalState();
+                        draggedComponent = prepareDraggedComponent(v, draggedComponent);
+                        dropCircuitComponent(draggedComponent, circuitdigramCard, event);
+                    }else if (tag.equals(connectionPointTag)){
+                        ConnectionPoint connectionPoint = (ConnectionPoint) event.getLocalState();
+                        circuitdigramCard.removeView(connectionPoint);
+                        dropConnectionPoint(connectionPoint,circuitdigramCard,event);
                     }
-                    draggedComponent.setVisibility(View.VISIBLE);
-
                 }
                 break;
             case DragEvent.ACTION_DRAG_ENDED:
@@ -174,8 +141,69 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     }
 
 
+    private void dropCircuitComponent(CircuitComponent component, ViewGroup parent, DragEvent event) {
+        if (!isSourceCircuitDiagram) {
+            float coords[] = {event.getX(), event.getY()};
+            coords = screenPointsToScaledPoints(coords);
+            component.setTopPoint(new PointF(coords[0] + component.getOffSetTopPoint().x, coords[1] + component.getOffSetTopPoint().y));
+            component.setBottomPoint(new PointF(coords[0] + component.getOffSetBottomPoint().x, coords[1] + component.getOffSetBottomPoint().y));
+
+        }
+        parent.addView(component);
+        if (mTranslateMatrixInverse != null && mScaleMatrixInverse != null) {
+            coords[0] = event.getX();
+            coords[1] = event.getY();
+            coords = screenPointsToScaledPoints(coords);
+            float[] drawPointCoordsTop = {event.getX(), event.getY()};
+            drawPointCoordsTop = screenPointsToScaledPoints(drawPointCoordsTop);
+            drawPointCoordsTop[0] += component.getOffSetTopPoint().x;
+            drawPointCoordsTop[1] += component.getOffSetTopPoint().y;
+            component.getTopPoint().x = drawPointCoordsTop[0];
+            component.getTopPoint().y = drawPointCoordsTop[1];
+            float[] drawPointCoordsBottom = {event.getX(), event.getY()};
+            drawPointCoordsBottom = screenPointsToScaledPoints(drawPointCoordsBottom);
+            drawPointCoordsBottom[0] += component.getOffSetBottomPoint().x;
+            drawPointCoordsBottom[1] += component.getOffSetBottomPoint().y;
+            component.getBottomPoint().x = drawPointCoordsBottom[0];
+            component.getBottomPoint().y = drawPointCoordsBottom[1];
+            component.setX(coords[0]);
+            component.setY(coords[1]);
+        } else {
+            component.setX(event.getX());
+            component.setY(event.getY());
+            float[] drawPointCoordsTop = {event.getX(), event.getY()};
+            drawPointCoordsTop[0] += component.getOffSetTopPoint().x;
+            drawPointCoordsTop[1] += component.getOffSetTopPoint().y;
+            component.getTopPoint().x = drawPointCoordsTop[0];
+            component.getTopPoint().y = drawPointCoordsTop[1];
+            float[] drawPointCoordsBottom = {event.getX(), event.getY()};
+            drawPointCoordsBottom[0] += component.getOffSetBottomPoint().x;
+            drawPointCoordsBottom[1] += component.getOffSetBottomPoint().y;
+            component.getBottomPoint().x = drawPointCoordsBottom[0];
+            component.getBottomPoint().y = drawPointCoordsBottom[1];
+        }
+        component.setVisibility(View.VISIBLE);
 
 
+    }
+
+    private void dropConnectionPoint(ConnectionPoint point, ViewGroup parent, DragEvent event) {
+        if (mTranslateMatrixInverse != null && mScaleMatrixInverse != null) {
+            coords[0] = event.getX();
+            coords[1] = event.getY();
+            coords = screenPointsToScaledPoints(coords);
+            point.setX(coords[0]);
+            point.setY(coords[1]);
+            point.refreshPointLocation();
+
+        }else {
+            point.setX(event.getX());
+            point.setY(event.getY());
+            point.refreshPointLocation();
+        }
+        parent.addView(point);
+        point.setVisibility(View.VISIBLE);
+    }
 
 
     public Matrix getmTranslateMatrixInverse() {

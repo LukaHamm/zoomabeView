@@ -6,10 +6,15 @@
         <entry key="..\:/Users/HammerL.NOTEBOOK338/StudioProjects/zoomabeView/app/src/main/res/layout/circuit_diagram.xml" value="0.20199275362318841" />
         <entry key="..\:/Users/HammerL.NOTEBOOK338/StudioProjects/zoomabeView/app/src/main/res/layout/sidespinner_view.xml" value="0.13802083333333334" />
         <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/drawable/circuitdiagramborder.xml" value="0.39114583333333336" />
+        <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/drawable/connectionpoint.xml" value="0.3490740740740741" />
+        <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/drawable/delete_icon.xml" value="0.3277777777777778" />
         <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/drawable/ic_outline_replay_24.xml" value="0.39114583333333336" />
+        <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/layout/activity_main.xml" value="0.182370820668693" />
         <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/layout/circuitComponentSmall.xml" value="2.0" />
         <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/layout/circuit_component_small.xml" value="0.75" />
+        <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/layout/dot.xml" value="7.0" />
         <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/layout/sidespinner_view.xml" value="0.375" />
+        <entry key="..\:/Users/luk-h/AndroidStudioProjects/zoomabeView/app/src/main/res/menu/top_app_bar.xml" value="0.375" />
         <entry key="..\:/Users/luk-h/StudioProjects/zoomabeView/app/src/main/res/drawable/ic__menu_24.xml" value="0.1" />
         <entry key="..\:/Users/luk-h/StudioProjects/zoomabeView/app/src/main/res/drawable/ic_baseline_create_24.xml" value="0.1" />
         <entry key="..\:/Users/luk-h/StudioProjects/zoomabeView/app/src/main/res/layout/activity_main.xml" value="0.16666666666666666" />
@@ -19,7 +24,7 @@
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

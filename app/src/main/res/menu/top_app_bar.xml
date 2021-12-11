@@ -5,9 +5,25 @@
     <item
         android:id="@+id/draw"
         android:icon="@drawable/ic_baseline_create_24"
-        android:title="connection"
+        android:title="drawMode"
         android:contentDescription="draw a wire between two components"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/delete_icon"
+        android:contentDescription="delete lines and Components"
+        android:title="deleteMode"
+        app:showAsAction="ifRoom">
+
+    </item>
+    <item
+        android:id="@+id/normal"
+        android:icon="@drawable/move_icon"
+        android:contentDescription="move components"
+        android:title="normalMode"
+        app:showAsAction="ifRoom">
+
+    </item>
 
 
 </menu>

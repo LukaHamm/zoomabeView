@@ -3,15 +3,19 @@ package com.lukh.zoomabeview.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.*;
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentDragListenerTest;
+import com.lukh.zoomabeview.Listeners.OnCircuitComponentTouchedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,8 @@ public class ZoomableViewGroup extends ViewGroup {
 
     private static final int INVALID_POINTER_ID = 1;
     private int mActivePointerId = INVALID_POINTER_ID;
+    private final String circuitComponentTag = "CircuitComponent";
+    private final String connectionPointTag = "ConnectionPoint";
 
     private float mScaleFactor = 1;
     private ScaleGestureDetector mScaleDetector;
@@ -44,13 +50,18 @@ public class ZoomableViewGroup extends ViewGroup {
     private float[] mDispatchTouchEventWorkingArray = new float[2];
     private float[] mOnTouchEventWorkingArray = new float[2];
     private boolean drawMode;
+    private boolean deleteMode;
+    private boolean normalMode;
     private int touchCount = 0;
     private PointF drawBegin;
     private PointF drawEnd;
     private List<PointF> lineCoordinates = new ArrayList<PointF>();
     private CircuitComponent currentDrawPointBeginComponent;
     private CircuitComponent currentDrawpointEndComponent;
-    private boolean isBottomValue = false;
+    private ConnectionPoint startConnectionPoint;
+    private ConnectionPoint endConnectionPoint;
+    private boolean preventOnDrawBegin = false;
+    private boolean preventOnDrawEnd = false;
 
     private OnCircuitComponentDragListener onCircuitComponentDragListener;
     private OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest;
@@ -76,18 +87,53 @@ public class ZoomableViewGroup extends ViewGroup {
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child.getVisibility() != GONE) {
-                child.layout(l, t, l+child.getMeasuredWidth(), t + child.getMeasuredHeight());
+                child.layout(l, t, l + child.getMeasuredWidth(), t + child.getMeasuredHeight());
             }
         }
     }
 
 
-    public void initDrawMode(boolean drawMode){
+    public void initDrawMode(boolean drawMode) {
+        if(drawMode) {
+            initDeleteMode(false);
+            initNormalMode(false);
+        }
         this.drawMode = drawMode;
+        this.preventOnDrawBegin = false;
+        this.preventOnDrawEnd = false;
+
+
+    }
+
+    public void initDeleteMode(boolean deleteMode){
+            if(deleteMode) {
+                initDrawMode(false);
+                initNormalMode(false);
+                this.drawBegin = null;
+                this.drawEnd = null;
+                this.touchCount = 0;
+            }
+            this.deleteMode = deleteMode;
+
+    }
+
+    public void  initNormalMode(boolean normalMode){
+        if(normalMode) {
+            initDrawMode(false);
+            initDeleteMode(false);
+            this.drawBegin = null;
+            this.drawEnd = null;
+            this.touchCount = 0;
+        }
         int childCount = getChildCount();
-        for(int i = 0; i< childCount;i++){
-            CircuitComponent circuitComponent = (CircuitComponent) getChildAt(i);
-            circuitComponent.setDrawMode(drawMode);
+        for (int i = 0; i < childCount; i++) {
+            if (getChildAt(i).getTag().equals(circuitComponentTag)) {
+                CircuitComponent circuitComponent = (CircuitComponent) getChildAt(i);
+                circuitComponent.setNormalMode(normalMode);
+            } else if (getChildAt(i).getTag().equals(connectionPointTag)) {
+                ConnectionPoint connectionPoint = (ConnectionPoint) getChildAt(i);
+                connectionPoint.setNormalMode(normalMode);
+            }
         }
 
     }
@@ -108,57 +154,62 @@ public class ZoomableViewGroup extends ViewGroup {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         canvas.save();
-        if(!drawMode) {
-            canvas.translate(mPosX, mPosY);
-            canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
-            float lineCoordinatesArray [] = pointListToFloatArray(lineCoordinates);
-            Paint paint = new Paint();
-            paint.setColor(Color.BLACK);
-            canvas.drawLines(lineCoordinatesArray, paint);
-        }else{
-            canvas.translate(mPosX, mPosY);
-            if(drawBegin != null && drawEnd != null) {
-                PointF newdrawBegin = new PointF(drawBegin.x,drawBegin.y);
-                PointF newDrawEnd = new PointF(drawEnd.x,drawEnd.y);
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        if (drawMode) {
+            if (drawBegin != null && drawEnd != null) {
+                if (currentDrawPointBeginComponent != null) {
+                    currentDrawPointBeginComponent.setPointLocationOnComponent(drawBegin);
+                } else if (startConnectionPoint != null) {
+                    startConnectionPoint.setDrawPointLocation(drawBegin);
+                } else if (currentDrawPointBeginComponent == null && startConnectionPoint == null && !preventOnDrawBegin) {
+                    ConnectionPoint connectionPoint = new ConnectionPoint(getContext());
+                    connectionPoint.setXYCoordinatesBasedOnPoint(drawBegin);
+                    connectionPoint.setOnCircuitComponentTouchedListener(new OnCircuitComponentTouchedListener());
+                    connectionPoint.setNormalMode(this.normalMode);
+                    this.addView(connectionPoint);
+                    preventOnDrawBegin = true;
+                }
+                if (currentDrawpointEndComponent != null) {
+                    currentDrawpointEndComponent.setPointLocationOnComponent(drawEnd);
+                } else if (endConnectionPoint != null) {
+                    endConnectionPoint.setDrawPointLocation(drawEnd);
+                } else if (currentDrawpointEndComponent == null && endConnectionPoint == null && !preventOnDrawEnd) {
+                    ConnectionPoint connectionPoint = new ConnectionPoint(getContext());
+                    connectionPoint.setXYCoordinatesBasedOnPoint(drawEnd);
+                    connectionPoint.setOnCircuitComponentTouchedListener(new OnCircuitComponentTouchedListener());
+                    connectionPoint.setNormalMode(this.normalMode);
+                    this.addView(connectionPoint);
+                    preventOnDrawEnd = true;
+                }
 
-                if(currentDrawPointBeginComponent != null){
-                    if(!isBottomValue){
-                        currentDrawPointBeginComponent.setTopPoint(newdrawBegin);
-                    }else{
-                        currentDrawPointBeginComponent.setBottomPoint(newdrawBegin);
-                    }
-                }
-                if(currentDrawpointEndComponent != null){
-                    if(!isBottomValue) {
-                        currentDrawpointEndComponent.setTopPoint(newDrawEnd);
-                    }else{
-                        currentDrawpointEndComponent.setBottomPoint(newDrawEnd);
-                    }
-                }
-                lineCoordinates.add(newdrawBegin);
-                lineCoordinates.add(newDrawEnd);
-                currentDrawPointBeginComponent= null;
+                lineCoordinates.add(drawEnd);
+                lineCoordinates.add(drawBegin);
+                drawEnd = null;
+                drawBegin = null;
+                currentDrawPointBeginComponent = null;
                 currentDrawpointEndComponent = null;
-                isBottomValue = false;
+                endConnectionPoint = null;
+                startConnectionPoint = null;
             }
-            canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
-            float lineCoordinatesArray [] = pointListToFloatArray(lineCoordinates);
-            Paint paint = new Paint();
-            paint.setColor(Color.BLACK);
-            canvas.drawLines(lineCoordinatesArray, paint);
+        }
 
-            }
-            canvas.save();
+        canvas.translate(mPosX, mPosY);
+        canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
+        float lineCoordinatesArray[] = pointListToFloatArray(lineCoordinates);
+        canvas.drawLines(lineCoordinatesArray, paint);
+        canvas.save();
         super.dispatchDraw(canvas);
         canvas.restore();
+
     }
 
 
-    private float [] pointListToFloatArray(List<PointF> points){
-        int size = 2*points.size();
+    private float[] pointListToFloatArray(List<PointF> points) {
+        int size = 2 * points.size();
         int index = 0;
-        float floatArray [] = new float[size];
-        for (PointF point : points){
+        float floatArray[] = new float[size];
+        for (PointF point : points) {
             floatArray[index] = point.x;
             ++index;
             floatArray[index] = point.y;
@@ -202,16 +253,15 @@ public class ZoomableViewGroup extends ViewGroup {
         location[1] *= mScaleFactor;
         return super.invalidateChildInParent(location, dirty);
     }
-    
-     */
 
+     */
     private float[] scaledPointsToScreenPoints(float[] a) {
         mScaleMatrix.mapPoints(a);
         mTranslateMatrix.mapPoints(a);
         return a;
     }
 
-    private float[] screenPointsToScaledPoints(float[] a){
+    private float[] screenPointsToScaledPoints(float[] a) {
         mTranslateMatrixInverse.mapPoints(a);
         mScaleMatrixInverse.mapPoints(a);
         return a;
@@ -221,11 +271,11 @@ public class ZoomableViewGroup extends ViewGroup {
     public boolean onDragEvent(DragEvent event) {
         onCircuitComponentDragListenerTest.setmTranslateMatrixInverse(mTranslateMatrixInverse);
         onCircuitComponentDragListenerTest.setmScaleMatrixInverse(mScaleMatrixInverse);
-        return onCircuitComponentDragListenerTest.onDrag(this,event);
+        return onCircuitComponentDragListenerTest.onDrag(this, event);
     }
 
 
-    private boolean movingComponents(MotionEvent ev){
+    private boolean movingComponents(MotionEvent ev) {
         mOnTouchEventWorkingArray[0] = ev.getX();
         mOnTouchEventWorkingArray[1] = ev.getY();
         mOnTouchEventWorkingArray = scaledPointsToScreenPoints(mOnTouchEventWorkingArray);
@@ -295,31 +345,25 @@ public class ZoomableViewGroup extends ViewGroup {
         return true;
 
     }
-    private boolean drawConnections(MotionEvent ev){
-        /*mOnTouchEventWorkingArray[0] = ev.getX();
-        mOnTouchEventWorkingArray[1] = ev.getY();
-        mOnTouchEventWorkingArray = scaledPointsToScreenPoints(mOnTouchEventWorkingArray);
-        ev.setLocation(mOnTouchEventWorkingArray[0], mOnTouchEventWorkingArray[1]); */
-        if(ev.getAction() == MotionEvent.ACTION_DOWN) {
+
+    private boolean drawConnections(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             if (touchCount == 0) {
-                drawBegin = new PointF(ev.getX() , ev.getY());
+                drawBegin = new PointF(ev.getX(), ev.getY());
                 drawEnd = null;
                 touchCount++;
                 CircuitComponent component = isPointOnCircuitComponent(drawBegin);
-                if(component!= null){
-                    currentDrawPointBeginComponent = component;
-                    setPointLocationOnComponent(drawBegin,component);
-                }
+                startConnectionPoint = isPointOnConnectionPoint(drawBegin);
+                currentDrawPointBeginComponent = component;
                 return true;
             } else if (touchCount == 1) {
                 drawEnd = new PointF(ev.getX(), ev.getY());
                 touchCount = 0;
                 CircuitComponent component = isPointOnCircuitComponent(drawEnd);
-                if(component!= null){
-                    currentDrawpointEndComponent = component;
-                    setPointLocationOnComponent(drawEnd,component);
-                }
-
+                endConnectionPoint = isPointOnConnectionPoint(drawEnd);
+                currentDrawpointEndComponent = component;
+                preventOnDrawBegin = false;
+                preventOnDrawEnd = false;
                 invalidate();
                 return true;
             }
@@ -328,34 +372,79 @@ public class ZoomableViewGroup extends ViewGroup {
         return false;
     }
 
-    public void setPointLocationOnComponent(PointF drawPoint, CircuitComponent component){
-        float distanceTop = drawPoint.y - component.getY();
-        float distanceBottom = (component.getY() + 90) - drawPoint.y;
-        if(distanceTop < distanceBottom){
-            drawPoint.y = component.getY();
-            drawPoint.x = component.getX() +25;
-        }else{
-            drawPoint.y = component.getY() +90;
-            drawPoint.x = component.getX() +25;
-            isBottomValue = true;
-        }
+    private boolean delete(MotionEvent event){
+        PointF point = new PointF(event.getX(),event.getY());
+        CircuitComponent component = isPointOnCircuitComponent(point);
+        ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
+        if (component != null){
 
+        } else if (connectionPoint != null){
+
+        }else{
+
+        }
+        return false;
     }
 
-    public CircuitComponent isPointOnCircuitComponent (PointF point){
-        for(int i = 0;i< getChildCount();i++){
-            CircuitComponent child = (CircuitComponent) getChildAt(i);
-            float rightChild = child.getX() + child.getWidth();
-            float bottomChild = child.getY() + child.getHeight();
-            float x = child.getX();
-            float y = child.getY();
-            /*float [] scaledCoords = {rightChild,bottomChild};
-            float [] scaledCoords2 = {x,y};
-            scaledCoords = screenPointsToScaledPoints(scaledCoords);
-            scaledCoords2 = screenPointsToScaledPoints(scaledCoords2);*/
-            RectF rectF = new RectF(x,y,rightChild,bottomChild);
-            if(rectF.contains(point.x,point.y)){
-                return child;
+    private boolean deletePoints(PointF point){
+        PointF lastPoint = lineCoordinates.get(0);
+        for (int i = 1 ; i< lineCoordinates.size();i++){
+            float lambdaX = (point.x-lastPoint.x)/lineCoordinates.get(i).x;
+            float lambdaY = (point.y-lastPoint.y)/lineCoordinates.get(i).y;
+            if(lambdaX == lambdaY){
+                ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
+                if (connectionPoint != null){
+                    connectionPoint.setPointLeft(null);
+                }
+                lineCoordinates.remove(lineCoordinates.get(i));
+                lineCoordinates.remove(lastPoint);
+                return true;
+            }
+            i++;
+            lastPoint = lineCoordinates.get(i);
+        }
+        return  false;
+    }
+
+
+
+
+
+    public ConnectionPoint isPointOnConnectionPoint(PointF point) {
+        for (int i = 0; i < getChildCount(); i++) {
+            if (getChildAt(i).getTag().equals(connectionPointTag)) {
+                ConnectionPoint child = (ConnectionPoint) getChildAt(i);
+                float left = child.getX();
+                float top = child.getY();
+                float bottom = top + child.getHeight();
+                float right = left + child.getWidth();
+                RectF rectF = new RectF(left, top, right, bottom);
+                if (rectF.contains(point.x, point.y)) {
+                    return child;
+                }
+
+            }
+        }
+        return null;
+    }
+
+    public CircuitComponent isPointOnCircuitComponent(PointF point) {
+        for (int i = 0; i < getChildCount(); i++) {
+            if (getChildAt(i).getTag().equals(circuitComponentTag)) {
+                CircuitComponent child = (CircuitComponent) getChildAt(i);
+                float rightChild = child.getX() + child.getWidth();
+                float bottomChild = child.getY() + child.getHeight();
+                float x = child.getX();
+                float y = child.getY();
+                float rotation = child.getRotation();
+                Matrix m = new Matrix();
+                m.setRotate(-rotation, x + 25, y + 50);
+                RectF rectF = new RectF(x, y, rightChild, bottomChild);
+                m.mapRect(rectF);
+
+                if (rectF.contains(point.x, point.y)) {
+                    return child;
+                }
             }
         }
 
@@ -365,9 +454,9 @@ public class ZoomableViewGroup extends ViewGroup {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if(drawMode){
+        if (drawMode) {
             drawConnections(ev);
-        }else{
+        } else {
             movingComponents(ev);
         }
         return true;
@@ -377,7 +466,7 @@ public class ZoomableViewGroup extends ViewGroup {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if(!drawMode) {
+            if (!drawMode) {
                 mScaleFactor *= detector.getScaleFactor();
                 if (detector.isInProgress()) {
                     mFocusX = detector.getFocusX();
@@ -400,7 +489,8 @@ public class ZoomableViewGroup extends ViewGroup {
         return onCircuitComponentDragListener;
     }
 
-    public void setOnCircuitComponentDragListener(OnCircuitComponentDragListener onCircuitComponentDragListener) {
+    public void setOnCircuitComponentDragListener(OnCircuitComponentDragListener
+                                                          onCircuitComponentDragListener) {
         this.onCircuitComponentDragListener = onCircuitComponentDragListener;
     }
 
@@ -408,7 +498,8 @@ public class ZoomableViewGroup extends ViewGroup {
         return onCircuitComponentDragListenerTest;
     }
 
-    public void setOnCircuitComponentDragListenerTest(OnCircuitComponentDragListenerTest onCircuitComponentDragListenerTest) {
+    public void setOnCircuitComponentDragListenerTest(OnCircuitComponentDragListenerTest
+                                                              onCircuitComponentDragListenerTest) {
         this.onCircuitComponentDragListenerTest = onCircuitComponentDragListenerTest;
     }
 }

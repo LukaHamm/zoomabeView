@@ -36,6 +36,8 @@ public class CircuitDiagramFragment extends Fragment {
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
     public  static final String id = "CircuitDiagramFragment";
     private boolean drawMode;
+    private boolean deleteMode;
+    private boolean normalMode;
 
 
 
@@ -64,9 +66,7 @@ public class CircuitDiagramFragment extends Fragment {
         resistance.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
         voltageSource.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
         currentSource.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
-        currentSource.setTag("currentsource0");
-        voltageSource.setTag("voltagesource0");
-        resistance.setTag("resistance0");
+
 
 
 
@@ -76,14 +76,29 @@ public class CircuitDiagramFragment extends Fragment {
         ciruitDiagramCardView.initDrawMode(drawMode);
 
     }
+    private void initDeleteMode(){
+        ciruitDiagramCardView.initDeleteMode(deleteMode);
+
+    }
+    private void initNormalMode(){
+        ciruitDiagramCardView.initNormalMode(normalMode);
+
+    }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
             case R.id.draw:
-                drawMode = !drawMode;
+                drawMode = true;
                 initDrawMode();
                 break;
+            case R.id.delete:
+                deleteMode = true;
+                initDeleteMode();
+                break;
+            case R.id.normal:
+                normalMode = true;
+                initNormalMode();
         }
 
         return true;

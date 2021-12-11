@@ -21,6 +21,8 @@ import com.lukh.zoomabeview.Listeners.OnCircuitComponentTouchedListener;
 import com.lukh.zoomabeview.Listeners.OnRotateButtonClickListener;
 import com.lukh.zoomabeview.R;
 
+import java.util.List;
+
 public class CircuitComponent extends LinearLayout {
 
     private OnCircuitComponentTouchedListener onCircuitComponentTouchedListener;
@@ -34,13 +36,15 @@ public class CircuitComponent extends LinearLayout {
     private final String resistanceId = "resistance";
     private final String voltageSourceId = "voltage_source";
     private final String currentSourceId = "current_source";
-    private ViewGroup.LayoutParams rotateButtonParams;
-    private ViewGroup.LayoutParams componentSymbolParams;
     private int height;
     private int width;
     private boolean drawMode;
+    private boolean deleteMode;
+    private boolean normalMode = true;
     private PointF topPoint;
     private PointF bottomPoint;
+    private PointF offSetTopPoint= new PointF(25,0);
+    private PointF offSetBottomPoint = new PointF(25,90);
     private String connection;
 
     public CircuitComponent(Context context, Integer id) {
@@ -52,6 +56,7 @@ public class CircuitComponent extends LinearLayout {
 
     public CircuitComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setTag("CircuitComponent");
         initializeView(context);
     }
 
@@ -87,7 +92,7 @@ public class CircuitComponent extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if(!drawMode) {
+        if(normalMode) {
             onCircuitComponentTouchedListener.onTouch(this, event);
         }else{
             PointF point = new PointF(this.getX(),this.getY());
@@ -101,6 +106,20 @@ public class CircuitComponent extends LinearLayout {
         public void onLongPress(MotionEvent e) {
             onCircuitComponentLongClickListener.onLongClick(CircuitComponent.this);
         }
+    }
+
+    public void deleteAllPoints(List<PointF> lineCoordinates){
+        //Abfragen ob Punkt gerade oder ungerader index
+         PointF topPointFirst = lineCoordinates.get(lineCoordinates.indexOf(topPoint));
+         PointF topPointConnection = lineCoordinates.get(lineCoordinates.indexOf(topPoint)+1);
+         PointF bottomPointFirst = lineCoordinates.get(lineCoordinates.indexOf(topPoint));
+         PointF bottomPointConnection = lineCoordinates.get(lineCoordinates.indexOf(topPoint)+1);
+         lineCoordinates.remove(topPointFirst);
+         lineCoordinates.remove(topPointConnection);
+         lineCoordinates.remove(bottomPointFirst);
+         lineCoordinates.remove(bottomPointConnection);
+
+
     }
 
     public void initAllChild() {
@@ -147,6 +166,28 @@ public class CircuitComponent extends LinearLayout {
         parentMeasurements[0] = this.width;
         parentMeasurements[1] = this.height;
         rotateButton.setOnClickListener(new OnRotateButtonClickListener());
+    }
+
+    public void setPointLocationOnComponent(PointF drawPoint) {
+        PointF currentDrawPointTop = this.getTopPoint();
+        PointF currentDrawPointBottom = this.getBottomPoint();
+        boolean isTopPoint = false;
+        if (this.getOffSetTopPoint().y == 0 || this.getOffSetBottomPoint().y == 10) {
+            isTopPoint = (Math.abs(drawPoint.y - currentDrawPointTop.y)) < (Math.abs(drawPoint.y - currentDrawPointBottom.y));
+        }
+        if (this.getOffSetTopPoint().y == 50) {
+            isTopPoint = Math.abs(drawPoint.x - currentDrawPointTop.x) < Math.abs(drawPoint.x - currentDrawPointBottom.x);
+        }
+        if (isTopPoint) {
+            drawPoint.y = this.getY() + this.getOffSetTopPoint().y;
+            drawPoint.x = this.getX() + this.getOffSetTopPoint().x;
+            this.topPoint = drawPoint;
+        } else {
+            drawPoint.y = this.getY() + this.getOffSetBottomPoint().y;
+            drawPoint.x = this.getX() + this.getOffSetBottomPoint().x;
+            this.bottomPoint = drawPoint;
+        }
+
     }
 
     public Button getRotateButton() {
@@ -226,6 +267,29 @@ public class CircuitComponent extends LinearLayout {
         this.connection = connection;
     }
 
+    public PointF getOffSetTopPoint() {
+        return offSetTopPoint;
+    }
+
+    public void setOffSetTopPoint(PointF offSetTopPoint) {
+        this.offSetTopPoint = offSetTopPoint;
+    }
+
+    public PointF getOffSetBottomPoint() {
+        return offSetBottomPoint;
+    }
+
+    public void setOffSetBottomPoint(PointF offSetBottomPoint) {
+        this.offSetBottomPoint = offSetBottomPoint;
+    }
+
+    public boolean isNormalMode() {
+        return normalMode;
+    }
+
+    public void setNormalMode(boolean normalMode) {
+        this.normalMode = normalMode;
+    }
 }
 
 
