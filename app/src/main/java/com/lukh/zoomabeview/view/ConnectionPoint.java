@@ -98,8 +98,25 @@ public class ConnectionPoint extends View {
     }
 
     public void deleteAllPoints(List<PointF> lineCoordinates){
-        //Abfragen ob Punkt geradern Index oder ungerader
-        PointF leftPointConnection = lineCoordinates.get(lineCoordinates.indexOf(pointLeft)+1);
+        //Abfragen ob Punkt gerader Index oder ungerader
+        PointF points [] = {pointLeft,pointTop,pointRight,pointBottom};
+        float pointIndexList[] = new float [8];
+        int currentIndex = 0;
+        for(int i = 0;i<points.length;i++){
+            float indexPoint = lineCoordinates.indexOf(points[i]);
+            float indexPointConnection = indexPoint%2== 0? indexPoint+1:indexPoint-1;
+            pointIndexList[currentIndex] = indexPoint;
+            ++currentIndex;
+            pointIndexList[currentIndex] = indexPointConnection;
+            ++currentIndex;
+        }
+        for(int i = 0; i<pointIndexList.length;i++){
+            lineCoordinates.remove(pointIndexList[i]);
+        }
+        this.pointBottom= null;
+        this.pointRight = null;
+        this.pointLeft = null;
+        this.pointTop = null;
     }
 
 

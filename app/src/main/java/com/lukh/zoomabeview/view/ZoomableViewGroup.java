@@ -51,7 +51,7 @@ public class ZoomableViewGroup extends ViewGroup {
     private float[] mOnTouchEventWorkingArray = new float[2];
     private boolean drawMode;
     private boolean deleteMode;
-    private boolean normalMode;
+    private boolean normalMode = true;
     private int touchCount = 0;
     private PointF drawBegin;
     private PointF drawEnd;
@@ -135,6 +135,7 @@ public class ZoomableViewGroup extends ViewGroup {
                 connectionPoint.setNormalMode(normalMode);
             }
         }
+        this.normalMode = normalMode;
 
     }
 
@@ -183,8 +184,8 @@ public class ZoomableViewGroup extends ViewGroup {
                     preventOnDrawEnd = true;
                 }
 
-                lineCoordinates.add(drawEnd);
                 lineCoordinates.add(drawBegin);
+                lineCoordinates.add(drawEnd);
                 drawEnd = null;
                 drawBegin = null;
                 currentDrawPointBeginComponent = null;
@@ -376,12 +377,22 @@ public class ZoomableViewGroup extends ViewGroup {
         PointF point = new PointF(event.getX(),event.getY());
         CircuitComponent component = isPointOnCircuitComponent(point);
         ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
-        if (component != null){
-
-        } else if (connectionPoint != null){
-
-        }else{
-
+        if (component != null && connectionPoint == null){
+            component.deleteAllPoints(lineCoordinates);
+            this.removeView(component);
+            invalidate();
+            return true;
+        }
+        if (connectionPoint != null && component == null){
+            connectionPoint.deleteAllPoints(lineCoordinates);
+            this.removeView(connectionPoint);
+            invalidate();
+            return true;
+        }
+        if(component == null && connectionPoint == null){
+            invalidate();
+            deletePoints(point);
+            return true;
         }
         return false;
     }
@@ -401,6 +412,9 @@ public class ZoomableViewGroup extends ViewGroup {
                 return true;
             }
             i++;
+            if (i== lineCoordinates.size()){
+                break;
+            }
             lastPoint = lineCoordinates.get(i);
         }
         return  false;
@@ -456,8 +470,10 @@ public class ZoomableViewGroup extends ViewGroup {
     public boolean onTouchEvent(MotionEvent ev) {
         if (drawMode) {
             drawConnections(ev);
-        } else {
+        } else if(normalMode) {
             movingComponents(ev);
+        }else if(deleteMode){
+            delete(ev);
         }
         return true;
     }
