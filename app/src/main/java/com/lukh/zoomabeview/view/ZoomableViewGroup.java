@@ -183,7 +183,6 @@ public class ZoomableViewGroup extends ViewGroup {
                     this.addView(connectionPoint);
                     preventOnDrawEnd = true;
                 }
-
                 lineCoordinates.add(drawBegin);
                 lineCoordinates.add(drawEnd);
                 drawEnd = null;
@@ -194,7 +193,9 @@ public class ZoomableViewGroup extends ViewGroup {
                 startConnectionPoint = null;
             }
         }
-
+        if(deleteMode) {
+            updateConnectionPoints();
+        }
         canvas.translate(mPosX, mPosY);
         canvas.scale(mScaleFactor, mScaleFactor, mFocusX, mFocusY);
         float lineCoordinatesArray[] = pointListToFloatArray(lineCoordinates);
@@ -203,6 +204,21 @@ public class ZoomableViewGroup extends ViewGroup {
         super.dispatchDraw(canvas);
         canvas.restore();
 
+    }
+
+    private void updateConnectionPoints() {
+        int childcount = getChildCount();
+        for(int i = 0; i< childcount;i++){
+            View v = getChildAt(i);
+            if(v.getTag().equals(connectionPointTag)){
+                ConnectionPoint connectionPoint = (ConnectionPoint) v;
+                boolean isValid = connectionPoint.checkPointsValid(lineCoordinates);
+                if(!isValid){
+                    removeView(connectionPoint);
+                }
+
+            }
+        }
     }
 
 
@@ -398,24 +414,26 @@ public class ZoomableViewGroup extends ViewGroup {
     }
 
     private boolean deletePoints(PointF point){
-        PointF lastPoint = lineCoordinates.get(0);
-        for (int i = 1 ; i< lineCoordinates.size();i++){
-            float lambdaX = (point.x-lastPoint.x)/lineCoordinates.get(i).x;
-            float lambdaY = (point.y-lastPoint.y)/lineCoordinates.get(i).y;
-            if(lambdaX == lambdaY){
-                ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
-                if (connectionPoint != null){
-                    connectionPoint.setPointLeft(null);
+        if(lineCoordinates.size() > 0) {
+            PointF lastPoint = lineCoordinates.get(0);
+            for (int i = 1; i < lineCoordinates.size(); i++) {
+                float lambdaX = (point.x - lastPoint.x) / lineCoordinates.get(i).x;
+                float lambdaY = (point.y - lastPoint.y) / lineCoordinates.get(i).y;
+                if (Math.abs(lambdaX - lambdaY)<0.5) {
+                    ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
+                    if (connectionPoint != null) {
+                        connectionPoint.setPointLeft(null);
+                    }
+                    lineCoordinates.remove(lineCoordinates.get(i));
+                    lineCoordinates.remove(lastPoint);
+                    return true;
                 }
-                lineCoordinates.remove(lineCoordinates.get(i));
-                lineCoordinates.remove(lastPoint);
-                return true;
+                i++;
+                if (i == lineCoordinates.size()) {
+                    break;
+                }
+                lastPoint = lineCoordinates.get(i);
             }
-            i++;
-            if (i== lineCoordinates.size()){
-                break;
-            }
-            lastPoint = lineCoordinates.get(i);
         }
         return  false;
     }
@@ -482,7 +500,7 @@ public class ZoomableViewGroup extends ViewGroup {
 
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            if (!drawMode) {
+            if (normalMode) {
                 mScaleFactor *= detector.getScaleFactor();
                 if (detector.isInProgress()) {
                     mFocusX = detector.getFocusX();

@@ -101,22 +101,49 @@ public class ConnectionPoint extends View {
         //Abfragen ob Punkt gerader Index oder ungerader
         PointF points [] = {pointLeft,pointTop,pointRight,pointBottom};
         float pointIndexList[] = new float [8];
+        PointF[] pointList = new PointF[8];
         int currentIndex = 0;
         for(int i = 0;i<points.length;i++){
-            float indexPoint = lineCoordinates.indexOf(points[i]);
-            float indexPointConnection = indexPoint%2== 0? indexPoint+1:indexPoint-1;
-            pointIndexList[currentIndex] = indexPoint;
+            int indexPoint = lineCoordinates.indexOf(points[i]);
+            if(indexPoint == -1){
+                continue;
+            }
+            int indexPointConnection = indexPoint%2== 0? indexPoint+1:indexPoint-1;
+            pointList[currentIndex] = lineCoordinates.get(indexPoint);
             ++currentIndex;
-            pointIndexList[currentIndex] = indexPointConnection;
+            pointList[currentIndex] = lineCoordinates.get(indexPointConnection);
             ++currentIndex;
         }
-        for(int i = 0; i<pointIndexList.length;i++){
-            lineCoordinates.remove(pointIndexList[i]);
+        for(int i = 0; i<pointList.length;i++){
+            if(pointList[i] != null) {
+                lineCoordinates.remove(pointList[i]);
+            }
         }
         this.pointBottom= null;
         this.pointRight = null;
         this.pointLeft = null;
         this.pointTop = null;
+    }
+
+    public boolean checkPointsValid(List<PointF> linecoordinates){
+        PointF[] pointList = {pointBottom,pointLeft,pointBottom,pointRight};
+        boolean isValid = true;
+        int countPointsNotValid = 0;
+        if(linecoordinates.size() == 0){
+            countPointsNotValid = pointList.length;
+            deleteAllPoints(linecoordinates);
+        }else {
+            for (int i = 0; i < pointList.length; i++) {
+                if (pointList[i] != null) {
+                    if (!linecoordinates.contains(pointList[i])) {
+                        ++countPointsNotValid;
+                        pointList[i] = null;
+                    }
+                }
+            }
+        }
+        isValid = !(countPointsNotValid==pointList.length);
+        return isValid;
     }
 
 

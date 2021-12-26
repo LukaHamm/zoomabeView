@@ -111,21 +111,23 @@ public class CircuitComponent extends LinearLayout {
     public void deleteAllPoints(List<PointF> lineCoordinates){
         //Abfragen ob Punkt gerade oder ungerader index
         PointF points [] = {this.topPoint,this.bottomPoint};
-        float pointIndexList [] = new float[4];
+        PointF pointsToDelete [] = new PointF[4];
         int currentIndex = 0;
         for(int i = 0 ; i< points.length;i++){
-            float indexPoint = lineCoordinates.indexOf(points[i]);
+            int indexPoint = lineCoordinates.indexOf(points[i]);
             if(indexPoint == -1){
                 continue;
             }
-            float indexPointConnection = indexPoint%2==0? indexPoint+1:indexPoint-1;
-            pointIndexList[currentIndex] = indexPoint;
+            int indexPointConnection = indexPoint%2==0? indexPoint+1:indexPoint-1;
+            pointsToDelete[currentIndex] = lineCoordinates.get(indexPoint);
             ++currentIndex;
-            pointIndexList[currentIndex] = indexPointConnection;
+            pointsToDelete[currentIndex] = lineCoordinates.get(indexPointConnection);
             ++currentIndex;
         }
-        for(int i = 0; i<pointIndexList.length;i++){
-            lineCoordinates.remove(pointIndexList[i]);
+        for(int i = 0; i<pointsToDelete.length;i++){
+            if(pointsToDelete[i] != null) {
+                lineCoordinates.remove(pointsToDelete[i]);
+            }
         }
 
 
