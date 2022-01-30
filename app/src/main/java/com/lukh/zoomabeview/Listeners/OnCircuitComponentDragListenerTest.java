@@ -28,6 +28,8 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private Matrix mScaleMatrix = new Matrix();
     private Matrix mScaleMatrixInverse = new Matrix();
     private float[] coords = new float[2];
+    private final String currentDirectionTag = "current_direction";
+    private final String voltageDirectionTag = "voltage_direction";
 
 
 
@@ -49,15 +51,22 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
             ImageView componentSymbol = copyComponentSymbol(draggedComponent.getComponentSymbol());
             Button rotateButton = copyRotateButton(draggedComponent.getRotateButton());
             RelativeLayout relativeLayout = copyRelLayout();
+            ImageView currentDirection = copyDirectionArrow(draggedComponent.getCurrentDirectionImage());
+            ImageView voltageDirection = copyDirectionArrow(draggedComponent.getVoltageDirectionImage());
             relativeLayout.addView(componentSymbol);
             relativeLayout.addView(rotateButton);
+            relativeLayout.addView(currentDirection);
+            relativeLayout.addView(voltageDirection);
             copiedDraggedComponent.addView(relativeLayout);
+            //copiedDraggedComponent.addView(currentDirection);
             copiedDraggedComponent.setRelativeLayout(relativeLayout);
             copiedDraggedComponent.setComponentSymbol(componentSymbol);
             copiedDraggedComponent.setRotateButton(rotateButton);
+            copiedDraggedComponent.setCurrentDirectionImage(currentDirection);
+            copiedDraggedComponent.setVoltageDirectionImage(voltageDirection);
             copiedDraggedComponent.initListeners();
             copiedDraggedComponent.setBackgroundColor(Color.TRANSPARENT);
-            copiedDraggedComponent.setLayoutParams(new ViewGroup.LayoutParams(50, 100));
+            copiedDraggedComponent.setLayoutParams(new ViewGroup.LayoutParams(70, 100));
             copiedDraggedComponent.setTag(circuitComponentTag);
             copiedDraggedComponent.setOnCircuitComponentTouchedListener(onCircuitComponentTouchedListener);
             return copiedDraggedComponent;
@@ -74,9 +83,10 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
         ImageView newComponentSymbol = new ImageView(context);
         newComponentSymbol.setImageDrawable(componentSymbol.getDrawable());
         newComponentSymbol.setBackgroundColor(Color.TRANSPARENT);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 90);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(50, 90);
         params.alignWithParent = true;
         params.bottomMargin = 10;
+        params.leftMargin = 20;
         newComponentSymbol.setLayoutParams(params);
         return newComponentSymbol;
     }
@@ -84,8 +94,8 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private Button copyRotateButton(Button rotateButton) {
         Button newRotateButton = new Button(context);
         newRotateButton.setBackground(rotateButton.getBackground());
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMarginStart(39);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(20, 20);
+        params.setMarginStart(50);
         params.setMarginEnd(1);
         params.setMargins(0, 0, 0, 89);
         params.alignWithParent = true;
@@ -99,6 +109,23 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         newRelativeLayout.setLayoutParams(params);
         return newRelativeLayout;
+    }
+
+    private ImageView copyDirectionArrow(ImageView directionArrow){
+        ImageView newDirectionArrow = new ImageView(context);
+        newDirectionArrow.setImageDrawable(directionArrow.getDrawable());
+        newDirectionArrow.setOnClickListener(new OnDirectionImageClickedListener());
+        if(directionArrow.getTag().equals(currentDirectionTag)){
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(10,10);
+            params.leftMargin = 40;
+            //params.topMargin = 10;
+            newDirectionArrow.setLayoutParams(params);
+        }else{
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(20,60);
+            params.topMargin = 15;
+            newDirectionArrow.setLayoutParams(params);
+        }
+        return newDirectionArrow;
     }
 
 

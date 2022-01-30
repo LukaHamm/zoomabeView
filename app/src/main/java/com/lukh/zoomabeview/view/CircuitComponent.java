@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentLongClickListener;
 import com.lukh.zoomabeview.Listeners.OnCircuitComponentTouchedListener;
+import com.lukh.zoomabeview.Listeners.OnDirectionImageClickedListener;
 import com.lukh.zoomabeview.Listeners.OnRotateButtonClickListener;
 import com.lukh.zoomabeview.R;
 
@@ -31,11 +32,15 @@ public class CircuitComponent extends LinearLayout {
     private Button rotateButton;
     private GestureDetector gestureDetector;
     private RelativeLayout relativeLayout;
+    private ImageView currentDirectionImage;
+    private ImageView voltageDirectionImage;
     private final String rotateButtonId = "rotateButton_";
     private final String componentId = "circuitComponent_";
     private final String resistanceId = "resistance";
     private final String voltageSourceId = "voltage_source";
     private final String currentSourceId = "current_source";
+    private final String currentDirectionId = "current_direction";
+    private final String voltageDirectionId = "voltage_direction";
     private int height;
     private int width;
     private boolean drawMode;
@@ -43,9 +48,11 @@ public class CircuitComponent extends LinearLayout {
     private boolean normalMode = true;
     private PointF topPoint;
     private PointF bottomPoint;
-    private PointF offSetTopPoint= new PointF(25,0);
-    private PointF offSetBottomPoint = new PointF(25,90);
+    private PointF offSetTopPoint= new PointF(45,0);
+    private PointF offSetBottomPoint = new PointF(45,90);
     private String connection;
+    private enum Description  {VOLTAGESOURCE,CURRENTSOURCE,RESISTANCE};
+    private Description description = null;
 
     public CircuitComponent(Context context, Integer id) {
         super(context);
@@ -53,6 +60,8 @@ public class CircuitComponent extends LinearLayout {
 
 
     }
+
+
 
     public CircuitComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -134,22 +143,26 @@ public class CircuitComponent extends LinearLayout {
     }
 
     public void initAllChild() {
-        int childCount = getChildCount();
         relativeLayout = (RelativeLayout) getChildAt(0);
-        //relativeLayout = (RelativeLayout) findViewById(R.id.circuitComponentContainer);
         int childCountRelLayout = relativeLayout.getChildCount();
         for (int i = 0; i < childCountRelLayout; i++) {
             View v = relativeLayout.getChildAt(i);
             if ((v.getResources().getResourceEntryName(v.getId()).equals(componentId))) {
                 this.componentSymbol = (ImageView) v;
-            } else {
+            } else if(v.getResources().getResourceEntryName(v.getId()).equals(rotateButtonId)) {
                 this.rotateButton = (Button) v;
+            }else if(v.getResources().getResourceEntryName(v.getId()).equals(currentDirectionId)) {
+                this.currentDirectionImage = (ImageView) v;
+            }else if(v.getResources().getResourceEntryName(v.getId()).equals(voltageDirectionId)){
+                this.voltageDirectionImage = (ImageView)v;
             }
         }
-        //rotateButtonParams = rotateButton.getLayoutParams();
         rotateButton.setEnabled(false);
         rotateButton.setVisibility(INVISIBLE);
-            //componentSymbolParams = componentSymbol.getLayoutParams();
+        currentDirectionImage.setVisibility(INVISIBLE);
+        currentDirectionImage.setTag(currentDirectionId);
+        voltageDirectionImage.setVisibility(INVISIBLE);
+        voltageDirectionImage.setTag(voltageDirectionId);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) componentSymbol.getLayoutParams();
         params.setMargins(0, 0, 0, 0);
         params.setMarginEnd(0);
@@ -162,13 +175,16 @@ public class CircuitComponent extends LinearLayout {
         componentSymbol.setImageDrawable(null);
         if (id.equals(currentSourceId)) {
             componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.currentsource));
+            this.description = Description.CURRENTSOURCE;
+
         }
         if (id.equals(resistanceId)) {
             componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.resistance));
+            this.description = Description.RESISTANCE;
         }
         if (id.equals(voltageSourceId)) {
             componentSymbol.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.voltagesource));
-
+            this.description = Description.VOLTAGESOURCE;
         }
     }
 
@@ -186,7 +202,7 @@ public class CircuitComponent extends LinearLayout {
         if (this.getOffSetTopPoint().y == 0 || this.getOffSetBottomPoint().y == 10) {
             isTopPoint = (Math.abs(drawPoint.y - currentDrawPointTop.y)) < (Math.abs(drawPoint.y - currentDrawPointBottom.y));
         }
-        if (this.getOffSetTopPoint().y == 50) {
+        if (this.getOffSetTopPoint().y == 60 || this.getOffSetTopPoint().y == 40) {
             isTopPoint = Math.abs(drawPoint.x - currentDrawPointTop.x) < Math.abs(drawPoint.x - currentDrawPointBottom.x);
         }
         if (isTopPoint) {
@@ -300,6 +316,22 @@ public class CircuitComponent extends LinearLayout {
 
     public void setNormalMode(boolean normalMode) {
         this.normalMode = normalMode;
+    }
+
+    public ImageView getCurrentDirectionImage() {
+        return currentDirectionImage;
+    }
+
+    public ImageView getVoltageDirectionImage() {
+        return voltageDirectionImage;
+    }
+
+    public void setCurrentDirectionImage(ImageView currentDirectionImage) {
+        this.currentDirectionImage = currentDirectionImage;
+    }
+
+    public void setVoltageDirectionImage(ImageView voltageDirectionImage) {
+        this.voltageDirectionImage = voltageDirectionImage;
     }
 }
 

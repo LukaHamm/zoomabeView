@@ -168,6 +168,7 @@ public class ZoomableViewGroup extends ViewGroup {
                     connectionPoint.setXYCoordinatesBasedOnPoint(drawBegin);
                     connectionPoint.setOnCircuitComponentTouchedListener(new OnCircuitComponentTouchedListener());
                     connectionPoint.setNormalMode(this.normalMode);
+                    connectionPoint.setTag(connectionPointTag);
                     this.addView(connectionPoint);
                     preventOnDrawBegin = true;
                 }
@@ -208,17 +209,21 @@ public class ZoomableViewGroup extends ViewGroup {
 
     private void updateConnectionPoints() {
         int childcount = getChildCount();
-        for(int i = 0; i< childcount;i++){
+        List<ConnectionPoint> connectionPointList = new ArrayList<ConnectionPoint>();
+        for(int i = 0; i< childcount; i++){
             View v = getChildAt(i);
-            if(v.getTag().equals(connectionPointTag)){
+            if(v.getTag().equals(connectionPointTag)) {
                 ConnectionPoint connectionPoint = (ConnectionPoint) v;
+                connectionPointList.add(connectionPoint);
+            }
+        }
+        for(int i = 0; i< connectionPointList.size();i++){
+                ConnectionPoint connectionPoint = connectionPointList.get(i);
                 boolean isValid = connectionPoint.checkPointsValid(lineCoordinates);
                 if(!isValid){
                     removeView(connectionPoint);
                 }
-
             }
-        }
     }
 
 
