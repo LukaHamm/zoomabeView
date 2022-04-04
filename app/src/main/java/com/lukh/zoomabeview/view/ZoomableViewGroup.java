@@ -174,22 +174,25 @@ public class ZoomableViewGroup extends ViewGroup {
                 }
                 if (currentDrawpointEndComponent != null) {
                     currentDrawpointEndComponent.setPointLocationOnComponent(drawEnd);
+                    connectWithStartComponent(currentDrawpointEndComponent);
                 } else if (endConnectionPoint != null) {
                     endConnectionPoint.setDrawPointLocation(drawEnd);
+                    connectWithStartComponent(endConnectionPoint);
                 } else if (currentDrawpointEndComponent == null && endConnectionPoint == null && !preventOnDrawEnd) {
                     ConnectionPoint connectionPoint = new ConnectionPoint(getContext());
                     connectionPoint.setXYCoordinatesBasedOnPoint(drawEnd);
                     connectionPoint.setOnCircuitComponentTouchedListener(new OnCircuitComponentTouchedListener());
                     connectionPoint.setNormalMode(this.normalMode);
+                    connectWithStartComponent(connectionPoint);
                     this.addView(connectionPoint);
                     preventOnDrawEnd = true;
                 }
                 lineCoordinates.add(drawBegin);
                 lineCoordinates.add(drawEnd);
-                drawEnd = null;
                 drawBegin = null;
                 currentDrawPointBeginComponent = null;
                 currentDrawpointEndComponent = null;
+                drawEnd = null;
                 endConnectionPoint = null;
                 startConnectionPoint = null;
             }
@@ -206,6 +209,26 @@ public class ZoomableViewGroup extends ViewGroup {
         canvas.restore();
 
     }
+
+    private void connectWithStartComponent(View view){
+        String type = (String) view.getTag();
+        if(type.equals(circuitComponentTag)){
+            CircuitComponent component  = (CircuitComponent) view;
+            if(currentDrawPointBeginComponent != null){
+                currentDrawPointBeginComponent.setNextComponent(component);
+            }else{
+                startConnectionPoint.setNextComponent(component);
+            }
+        }else{
+            ConnectionPoint connectionPoint  = (ConnectionPoint) view;
+            if(currentDrawPointBeginComponent != null){
+                currentDrawPointBeginComponent.setNextComponent(connectionPoint);
+            }else{
+                startConnectionPoint.setNextComponent(connectionPoint);
+            }
+        }
+    }
+
 
     private void updateConnectionPoints() {
         int childcount = getChildCount();
@@ -424,7 +447,7 @@ public class ZoomableViewGroup extends ViewGroup {
             for (int i = 1; i < lineCoordinates.size(); i++) {
                 float lambdaX = (point.x - lastPoint.x) / lineCoordinates.get(i).x;
                 float lambdaY = (point.y - lastPoint.y) / lineCoordinates.get(i).y;
-                if (Math.abs(lambdaX - lambdaY)<0.5) {
+                if (Math.abs(lambdaX - lambdaY)<0.3) {
                     ConnectionPoint connectionPoint = isPointOnConnectionPoint(point);
                     if (connectionPoint != null) {
                         connectionPoint.setPointLeft(null);

@@ -53,15 +53,15 @@ public class CircuitComponent extends LinearLayout {
     private String connection;
     private enum Description  {VOLTAGESOURCE,CURRENTSOURCE,RESISTANCE};
     private Description description = null;
+    private Integer value = 0;
+    private Integer uniqueComponentId = 0;
+    private View nextComponent;
+
 
     public CircuitComponent(Context context, Integer id) {
         super(context);
         setId(id);
-
-
     }
-
-
 
     public CircuitComponent(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -332,6 +332,30 @@ public class CircuitComponent extends LinearLayout {
 
     public void setVoltageDirectionImage(ImageView voltageDirectionImage) {
         this.voltageDirectionImage = voltageDirectionImage;
+    }
+
+    public Integer getValue() {
+        return value;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
+    }
+
+    public Integer getUniqueComponentId() {
+        return uniqueComponentId;
+    }
+
+    public void setUniqueComponentId(Integer uniqueComponentId) {
+        this.uniqueComponentId = uniqueComponentId;
+    }
+
+    public View getNextComponent() {
+        return nextComponent;
+    }
+
+    public void setNextComponent(View nextComponent) {
+        this.nextComponent = nextComponent;
     }
 }
 

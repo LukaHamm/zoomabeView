@@ -19,6 +19,7 @@ import java.util.List;
 public class ConnectionPoint extends View {
 
     private static final float radius = 5.0f;
+    private View nextComponent;
 
     public ConnectionPoint(Context context) {
         super(context);
@@ -202,5 +203,13 @@ public class ConnectionPoint extends View {
 
     public void setNormalMode(boolean normalMode) {
         this.normalMode = normalMode;
+    }
+
+    public View getNextComponent() {
+        return nextComponent;
+    }
+
+    public void setNextComponent(View nextComponent) {
+        this.nextComponent = nextComponent;
     }
 }

@@ -30,6 +30,7 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private float[] coords = new float[2];
     private final String currentDirectionTag = "current_direction";
     private final String voltageDirectionTag = "voltage_direction";
+    private Integer idCounter = 0;
 
 
 
@@ -48,6 +49,7 @@ public class OnCircuitComponentDragListenerTest implements View.OnDragListener {
     private CircuitComponent prepareDraggedComponent(View view, CircuitComponent draggedComponent) {
         if (!isSourceCircuitDiagram) {
             CircuitComponent copiedDraggedComponent = new CircuitComponent(context, draggedComponent.getId());
+            copiedDraggedComponent.setUniqueComponentId(this.idCounter++);
             ImageView componentSymbol = copyComponentSymbol(draggedComponent.getComponentSymbol());
             Button rotateButton = copyRotateButton(draggedComponent.getRotateButton());
             RelativeLayout relativeLayout = copyRelLayout();
